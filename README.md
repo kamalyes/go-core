@@ -3,7 +3,7 @@
  * @Author: kamalyes 501893067@qq.com
  * @Date: 2023-07-28 00:50:58
  * @LastEditors: kamalyes 501893067@qq.com
- * @LastEditTime: 2024-07-28 11:01:24
+ * @LastEditTime: 2024-07-28 23:26:18
  * @FilePath: \go-core\README.md
  * @Description:
  *
@@ -45,6 +45,7 @@ import (
  "github.com/kamalyes/go-config/env"
  "github.com/kamalyes/go-core/db"
  "github.com/kamalyes/go-core/global"
+ "github.com/kamalyes/go-core/minio"
  "github.com/kamalyes/go-core/mqtt"
  "github.com/kamalyes/go-core/redis"
  "github.com/kamalyes/go-core/srun"
@@ -67,6 +68,9 @@ func main() {
 
  // 初始化 redis 客户端
  global.REDIS = redis.Redis()
+
+ // 初始化 minio
+ global.Minio = minio.Minio()
 
  // 初始化 mqtt
  global.MQTT = mqtt.DefaultMqtt("111111")

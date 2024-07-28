@@ -2,7 +2,7 @@
  * @Author: kamalyes 501893067@qq.com
  * @Date: 2023-07-28 00:50:58
  * @LastEditors: kamalyes 501893067@qq.com
- * @LastEditTime: 2024-07-28 09:23:03
+ * @LastEditTime: 2024-07-28 22:59:57
  * @FilePath: \go-core\global\global.go
  * @Description:
  *
@@ -11,11 +11,13 @@
 package global
 
 import (
+	"github.com/bwmarrin/snowflake"
 	"github.com/casbin/casbin/v2"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"github.com/go-redis/redis/v8"
 	goconfig "github.com/kamalyes/go-config"
 	"github.com/kamalyes/go-config/env"
+	"github.com/minio/minio-go/v7"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
@@ -47,4 +49,10 @@ var (
 
 	// CSBEF casbin实施者
 	CSBEF casbin.IEnforcer
+
+	// 雪花ID节点
+	Node *snowflake.Node
+
+	// MinIO客户端
+	MinIO *minio.Client
 )

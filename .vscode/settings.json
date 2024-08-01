@@ -137,6 +137,7 @@
       "mapstructure",
       "minio",
       "Mqtt",
+      "Multipoint",
       "postgre",
       "varchar",
       "Wechat"

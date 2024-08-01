@@ -2,8 +2,8 @@
  * @Author: kamalyes 501893067@qq.com
  * @Date: 2023-07-28 00:50:58
  * @LastEditors: kamalyes 501893067@qq.com
- * @LastEditTime: 2024-07-28 09:13:14
- * @FilePath: \go-core\db\crud.go
+ * @LastEditTime: 2024-08-01 11:02:00
+ * @FilePath: \go-core\jwt\jwt.go
  * @Description:
  *
  * Copyright (c) 2024 by kamalyes, All Rights Reserved.
@@ -193,49 +193,128 @@ func GetClaims(c *gin.Context) (*CustomClaims, error) {
 	}
 }
 
-// GetUserName 获取用户名称
-func GetUserName(c *gin.Context) string {
-	var username string
-	if claims, ok := c.Get("claims"); ok {
-		waitUse := claims.(*CustomClaims)
-		username = waitUse.Username
-	} else {
-		username = ""
-	}
-	return username
+// ClaimHandlerFunc 定义处理声明的函数
+type ClaimHandlerFunc func(*CustomClaims) interface{}
+
+// ClaimHandlers 存储不同类型Claim的处理函数
+var ClaimHandlers = map[string]ClaimHandlerFunc{
+	"TokenId":      func(claims *CustomClaims) interface{} { return claims.TokenId },
+	"UserId":       func(claims *CustomClaims) interface{} { return claims.UserId },
+	"UserName":     func(claims *CustomClaims) interface{} { return claims.UserName },
+	"UserType":     func(claims *CustomClaims) interface{} { return claims.UserType },
+	"NickName":     func(claims *CustomClaims) interface{} { return claims.NickName },
+	"PhoneNumber":  func(claims *CustomClaims) interface{} { return claims.PhoneNumber },
+	"MerchantNo":   func(claims *CustomClaims) interface{} { return claims.MerchantNo },
+	"AuthorityId":  func(claims *CustomClaims) interface{} { return claims.AuthorityId },
+	"AppProductId": func(claims *CustomClaims) interface{} { return claims.AppProductId },
+	"PlatformType": func(claims *CustomClaims) interface{} { return claims.PlatformType },
+	"BufferTime":   func(claims *CustomClaims) interface{} { return claims.BufferTime },
+	"Extend":       func(claims *CustomClaims) interface{} { return claims.Extend },
 }
 
-// GetUserAuthorityId 从Gin的Context中获取从jwt解析出来的用户角色id
-func GetUserAuthorityId(c *gin.Context) string {
-	if claims, exists := c.Get("claims"); !exists {
-		global.LOG.Error("从Gin的Context中获取从jwt解析出来的用户UUID失败, 请检查路由是否使用jwt中间件!")
-		return ""
-	} else {
-		waitUse := claims.(*CustomClaims)
-		return waitUse.AuthorityId
+// GetClaimValue 从Gin的Context中获取特定类型的Claim值，通过ClaimHandlers映射来获取
+func GetClaimValue(c *gin.Context, key string) interface{} {
+	claims, exists := c.Get("claims")
+	if !exists {
+		return nil
 	}
+
+	customClaims, ok := claims.(*CustomClaims)
+	if !ok {
+		return nil
+	}
+
+	handler, found := ClaimHandlers[key]
+	if !found {
+		return nil
+	}
+
+	return handler(customClaims)
 }
 
-// GetUserID 获取用户ID
-func GetUserID(c *gin.Context) string {
-	var userID string
-	if claims, ok := c.Get("claims"); ok {
-		waitUse := claims.(*CustomClaims)
-		userID = waitUse.UserId
-	} else {
-		userID = ""
+// GetStringClaimValue 从Gin的Context中获取字符串类型的Claim值
+func GetStringClaimValue(c *gin.Context, key string) string {
+	value := GetClaimValue(c, key)
+	if strValue, ok := value.(string); ok {
+		return strValue
 	}
-	return userID
+	return ""
 }
 
-// GetTokenId 获取tokenId
+// GetInt32ClaimValue 从Gin的Context中获取Int32类型的Claim值
+func GetInt32ClaimValue(c *gin.Context, key string) int32 {
+	value := GetClaimValue(c, key)
+	if intValue, ok := value.(int32); ok {
+		return intValue
+	}
+	return 0
+}
+
+// GetInt64ClaimValue 从Gin的Context中获取Int64类型的Claim值
+func GetInt64ClaimValue(c *gin.Context, key string) int64 {
+	value := GetClaimValue(c, key)
+	if intValue, ok := value.(int64); ok {
+		return intValue
+	}
+	return 0
+}
+
+// GetTokenId 获取Token Id
 func GetTokenId(c *gin.Context) string {
-	var tokenId string
-	if claims, ok := c.Get("claims"); ok {
-		waitUse := claims.(*CustomClaims)
-		tokenId = waitUse.TokenId
-	} else {
-		tokenId = ""
-	}
-	return tokenId
+	return GetStringClaimValue(c, "TokenId")
+}
+
+// GetUserId 获取用户Id
+func GetUserId(c *gin.Context) string {
+	return GetStringClaimValue(c, "UserId")
+}
+
+// GetUserName 获取用户名
+func GetUserName(c *gin.Context) string {
+	return GetStringClaimValue(c, "UserName")
+}
+
+// GetUserType 获取用户类型
+func GetUserType(c *gin.Context) string {
+	return GetStringClaimValue(c, "UserType")
+}
+
+// GetNickName 获取用户昵称
+func GetNickName(c *gin.Context) string {
+	return GetStringClaimValue(c, "NickName")
+}
+
+// GetPhoneNumber 获取用户手机号
+func GetPhoneNumber(c *gin.Context) string {
+	return GetStringClaimValue(c, "PhoneNumber")
+}
+
+// GetMerchantNo 获取商户号
+func GetMerchantNo(c *gin.Context) string {
+	return GetStringClaimValue(c, "MerchantNo")
+}
+
+// GetUserAuthorityId 获取用户角色Id
+func GetUserAuthorityId(c *gin.Context) string {
+	return GetStringClaimValue(c, "AuthorityId")
+}
+
+// GetAppProductId 获取AppProduct Id
+func GetAppProductId(c *gin.Context) int32 {
+	return GetInt32ClaimValue(c, "AppProductId")
+}
+
+// GetPlatformType 获取Platform Type
+func GetPlatformType(c *gin.Context) int32 {
+	return GetInt32ClaimValue(c, "PlatformType")
+}
+
+// GetBufferTime 获取BufferTime
+func GetBufferTime(c *gin.Context) int64 {
+	return GetInt64ClaimValue(c, "BufferTime")
+}
+
+// GetExtend 获取Extend
+func GetExtend(c *gin.Context) string {
+	return GetStringClaimValue(c, "Extend")
 }

@@ -16,7 +16,7 @@ require (
 	github.com/spf13/viper v1.10.1
 	gorm.io/driver/mysql v1.5.7
 	gorm.io/driver/postgres v1.2.3
-	gorm.io/driver/sqlite v1.2.6
+	gorm.io/driver/sqlite v1.5.6
 	gorm.io/gorm v1.25.11
 )
 
@@ -80,7 +80,7 @@ require (
 	github.com/magiconair/properties v1.8.5 // indirect
 	github.com/mattn/go-colorable v0.1.12 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
-	github.com/mattn/go-sqlite3 v1.14.9 // indirect
+	github.com/mattn/go-sqlite3 v1.14.22 // indirect
 	github.com/miekg/dns v1.1.43 // indirect
 	github.com/minio/md5-simd v1.1.2 // indirect
 	github.com/minio/sha256-simd v0.1.1 // indirect

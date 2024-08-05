@@ -14,7 +14,7 @@ package global
 import (
 	"time"
 
-	"github.com/kamalyes/go-toolbox/dtype"
+	"github.com/kamalyes/go-core/dtype"
 )
 
 type Model struct {

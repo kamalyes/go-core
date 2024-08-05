@@ -45,4 +45,4 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           file: ./coverage.txt
           flags: unittests
-          slug: kamalyes/go-toolbox
+          slug: kamalyes/go-core

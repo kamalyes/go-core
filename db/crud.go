@@ -18,7 +18,7 @@ import (
 	"time"
 
 	"github.com/kamalyes/go-core/global"
-	"github.com/kamalyes/go-toolbox/page"
+	"github.com/kamalyes/go-core/page"
 )
 
 // FindPage 分页查询 v-空对象指针

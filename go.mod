@@ -15,6 +15,7 @@ require (
 	github.com/go-redis/redis/v8 v8.11.0
 	github.com/golang-jwt/jwt/v4 v4.5.0
 	github.com/kamalyes/go-config v0.0.5
+	github.com/kamalyes/go-toolbox v0.0.9
 	github.com/minio/minio-go/v7 v7.0.74
 	github.com/spf13/viper v1.19.0
 	go.uber.org/zap v1.27.0

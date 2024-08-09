@@ -2,7 +2,7 @@
  * @Author: kamalyes 501893067@qq.com
  * @Date: 2023-07-28 00:50:58
  * @LastEditors: kamalyes 501893067@qq.com
- * @LastEditTime: 2024-07-28 09:16:39
+ * @LastEditTime: 2024-08-09 09:22:00
  * @FilePath: \go-core\mqtt\mqtt.go
  * @Description:
  *
@@ -13,17 +13,17 @@ package mqtt
 import (
 	"time"
 
-	mqtt "github.com/eclipse/paho.mqtt.golang"
+	pahoMqtt "github.com/eclipse/paho.mqtt.golang"
 	"github.com/kamalyes/go-core/global"
 	"go.uber.org/zap"
 )
 
 // DefaultMqtt 创建默认的mqtt客户端
-func DefaultMqtt(clientId string) *mqtt.Client {
+func DefaultMqtt(clientId string) *pahoMqtt.Client {
 	global.LOG.Info("MQTT开始连接......")
 	config := global.CONFIG.Mqtt
 	global.LOG.Info("MQTT连接地址：" + config.Url)
-	opts := mqtt.NewClientOptions().AddBroker(config.Url).SetClientID(clientId)
+	opts := pahoMqtt.NewClientOptions().AddBroker(config.Url).SetClientID(clientId)
 	// 设置mqtt协议版本 4是3.1.1，3是3.1
 	opts.SetProtocolVersion(config.ProtocolVersion)
 	// 客户端掉线服务端不清除session
@@ -45,7 +45,7 @@ func DefaultMqtt(clientId string) *mqtt.Client {
 	opts.SetConnectTimeout(time.Duration(config.ConnectTimeout) * time.Second)
 	// 设置遗言
 	opts.SetWill(config.WillTopic, clientId, 1, false)
-	client := mqtt.NewClient(opts)
+	client := pahoMqtt.NewClient(opts)
 	if token := client.Connect(); token.Wait() && token.Error() != nil {
 		global.LOG.Error("MQTT连接异常......", zap.Any(" mqtt:", token.Error()))
 	}
@@ -53,11 +53,11 @@ func DefaultMqtt(clientId string) *mqtt.Client {
 }
 
 // Mqtt 连接和订阅
-func Mqtt(clientId string, onConn mqtt.OnConnectHandler, onLost mqtt.ConnectionLostHandler, reConn mqtt.ReconnectHandler) *mqtt.Client {
+func Mqtt(clientId string, onConn pahoMqtt.OnConnectHandler, onLost pahoMqtt.ConnectionLostHandler, reConn pahoMqtt.ReconnectHandler) *pahoMqtt.Client {
 	global.LOG.Info("MQTT开始连接......")
 	config := global.CONFIG.Mqtt
 	global.LOG.Info("MQTT连接地址：" + config.Url)
-	opts := mqtt.NewClientOptions().AddBroker(config.Url).SetClientID(clientId)
+	opts := pahoMqtt.NewClientOptions().AddBroker(config.Url).SetClientID(clientId)
 	// 设置mqtt协议版本 4是3.1.1，3是3.1
 	opts.SetProtocolVersion(config.ProtocolVersion)
 	// 客户端掉线服务端不清除session
@@ -93,7 +93,7 @@ func Mqtt(clientId string, onConn mqtt.OnConnectHandler, onLost mqtt.ConnectionL
 	} else {
 		opts.SetReconnectingHandler(reConn)
 	}
-	client := mqtt.NewClient(opts)
+	client := pahoMqtt.NewClient(opts)
 	if token := client.Connect(); token.Wait() && token.Error() != nil {
 		global.LOG.Error("MQTT连接异常......", zap.Any(" mqtt:", token.Error()))
 	}
@@ -101,11 +101,11 @@ func Mqtt(clientId string, onConn mqtt.OnConnectHandler, onLost mqtt.ConnectionL
 }
 
 // 连接断开
-func onLostHandler(client mqtt.Client, err error) {
+func onLostHandler(client pahoMqtt.Client, err error) {
 	global.LOG.Info("MQTT连接已经断开")
 }
 
 // 断线重连后重新回调
-func reConnHandler(client mqtt.Client, options *mqtt.ClientOptions) {
+func reConnHandler(client pahoMqtt.Client, options *pahoMqtt.ClientOptions) {
 	global.LOG.Info("MQTT开始重新连接")
 }

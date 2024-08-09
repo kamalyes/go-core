@@ -2,7 +2,7 @@
  * @Author: kamalyes 501893067@qq.com
  * @Date: 2023-07-28 00:50:58
  * @LastEditors: kamalyes 501893067@qq.com
- * @LastEditTime: 2024-07-28 10:38:51
+ * @LastEditTime: 2024-08-08 16:56:55
  * @FilePath: \go-core\captcha\captcha.go
  * @Description:
  *
@@ -18,52 +18,96 @@ import (
 	"go.uber.org/zap"
 )
 
-// NewDefaultRedisStore 初始化默认的验证码redis共享存储器
-func NewDefaultRedisStore() *RedisStore {
-	return &RedisStore{
-		Expiration: time.Second * 180,
-		PreKey:     "CAPTCHA_",
-	}
-}
+var (
+	expirationTime = time.Second * 180
+	perFixKey      = "km_captcha"
+)
 
 type RedisStore struct {
 	Expiration time.Duration
-	PreKey     string
+	PrefixKey  string
 	Context    context.Context
 }
 
+type RedisError string
+
+// RedisStoreInterface 是 RedisStore 的接口
+type RedisStoreInterface interface {
+	Set(id string, value string) error
+	Get(key string, clear bool) (string, error)
+	Verify(id, answer string, clear bool) bool
+	UseWithCtx(ctx context.Context) *RedisStore
+}
+
+// SetExpirationTime 设置过期时间
+func SetExpirationTime(duration time.Duration) {
+	expirationTime = duration
+}
+
+// GetExpirationTime 获取过期时间
+func GetExpirationTime() time.Duration {
+	return expirationTime
+}
+
+// SetPerFixKey 设置前缀键
+func SetPerFixKey(key string) {
+	perFixKey = key
+}
+
+// GetPerFixKey 获取前缀键
+func GetPerFixKey() string {
+	return perFixKey
+}
+
+// NewDefaultRedisStore 初始化默认的验证码 Redis 共享存储器
+func NewDefaultRedisStore() RedisStoreInterface {
+	return &RedisStore{
+		Expiration: GetExpirationTime(),
+		PrefixKey:  GetPerFixKey(),
+	}
+}
+
+// UseWithCtx 设置 RedisStore 的上下文
 func (rs *RedisStore) UseWithCtx(ctx context.Context) *RedisStore {
 	rs.Context = ctx
 	return rs
 }
 
-func (rs *RedisStore) Set(id string, value string) error {
-	err := global.REDIS.Set(rs.Context, rs.PreKey+id, value, rs.Expiration).Err()
+// logRedisStoreError 记录 Redis 操作错误并返回错误
+func logRedisStoreError(action string, err error) error {
+	global.LOG.Error(action, zap.Error(err))
+	return err
+}
+
+// Set 在 Redis 中设置键值对
+func (rs *RedisStore) Set(key string, value string) error {
+	err := global.REDIS.Set(rs.Context, rs.PrefixKey+key, value, rs.Expiration).Err()
 	if err != nil {
-		global.LOG.Error("RedisStoreSetError!", zap.Error(err))
-		return err
+		return logRedisStoreError("RedisStoreSetError!", err)
 	}
 	return nil
 }
 
-func (rs *RedisStore) Get(key string, clear bool) string {
+// Get 从 Redis 中获取键值对，并可选择清除
+func (rs *RedisStore) Get(key string, clear bool) (string, error) {
 	val, err := global.REDIS.Get(rs.Context, key).Result()
 	if err != nil {
-		global.LOG.Error("RedisStoreGetError!", zap.Error(err))
-		return ""
+		return val, logRedisStoreError("RedisStoreGetError!", err)
 	}
 	if clear {
 		err := global.REDIS.Del(rs.Context, key).Err()
 		if err != nil {
-			global.LOG.Error("RedisStoreClearError!", zap.Error(err))
-			return ""
+			return val, logRedisStoreError("RedisStoreClearError!", err)
 		}
 	}
-	return val
+	return val, nil
 }
 
-func (rs *RedisStore) Verify(id, answer string, clear bool) bool {
-	key := rs.PreKey + id
-	v := rs.Get(key, clear)
+// Verify 验证验证码答案是否正确
+func (rs *RedisStore) Verify(key, answer string, clear bool) bool {
+	v, err := rs.Get(rs.PrefixKey+key, clear)
+	if err != nil {
+		return false
+	}
 	return v == answer
 }

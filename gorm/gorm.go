@@ -2,15 +2,17 @@
  * @Author: kamalyes 501893067@qq.com
  * @Date: 2023-07-28 00:50:58
  * @LastEditors: kamalyes 501893067@qq.com
- * @LastEditTime: 2024-07-28 10:59:59
- * @FilePath: \go-core\db\gorm.go
+ * @LastEditTime: 2024-08-09 09:56:06
+ * @FilePath: \go-core\gorm\gorm.go
  * @Description:
  *
  * Copyright (c) 2024 by kamalyes, All Rights Reserved.
  */
-package db
+package gorm
 
 import (
+	"fmt"
+	"net/url"
 	"os"
 	"time"
 
@@ -46,7 +48,14 @@ func GormMySQL() *gorm.DB {
 	if config.Host == "" {
 		return nil
 	}
-	dsn := config.Username + ":" + config.Password + "@tcp(" + config.Host + ":" + config.Port + ")/" + config.Dbname + "?" + config.Config
+	// 构建需要转义的参数值
+	host := url.QueryEscape(config.Host)
+	user := url.QueryEscape(config.Username)
+	password := url.QueryEscape(config.Password)
+	dbname := url.QueryEscape(config.Dbname)
+	port := url.QueryEscape(config.Port)
+	configString := url.QueryEscape(config.Config)
+	dsn := user + ":" + password + "@tcp(" + host + ":" + port + ")/" + dbname + "?" + configString
 	mysqlConfig := mysql.Config{
 		DSN:                       dsn,   // DSN data source name
 		DefaultStringSize:         191,   // string 类型字段的默认长度
@@ -99,7 +108,18 @@ func gormConfig(logLevel string) *gorm.Config {
 // @return: *gorm.DB
 func GormPostgreSQL() *gorm.DB {
 	config := global.CONFIG.PostgreSQL
-	dsn := "host=" + config.Host + " user=" + config.Username + " password=" + config.Password + " dbname=" + config.Dbname + " port=" + config.Port + " " + config.Config
+	if config.Host == "" {
+		return nil
+	}
+	// 构建需要转义的参数值
+	host := url.QueryEscape(config.Host)
+	user := url.QueryEscape(config.Username)
+	password := url.QueryEscape(config.Password)
+	dbname := url.QueryEscape(config.Dbname)
+	port := url.QueryEscape(config.Port)
+	configString := url.QueryEscape(config.Config)
+
+	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s %s", host, user, password, dbname, port, configString)
 	db, err := gorm.Open(postgres.New(postgres.Config{
 		DSN:                  dsn,
 		PreferSimpleProtocol: true, // 禁用隐式 prepared statement

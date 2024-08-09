@@ -2,8 +2,8 @@
  * @Author: kamalyes 501893067@qq.com
  * @Date: 2023-07-28 00:50:58
  * @LastEditors: kamalyes 501893067@qq.com
- * @LastEditTime: 2024-08-06 10:12:17
- * @FilePath: \go-core\dtype\disid.go
+ * @LastEditTime: 2024-07-28 11:59:16
+ * @FilePath: \go-core\internal\dtype\dtime.go
  * @Description:
  *
  * Copyright (c) 2024 by kamalyes, All Rights Reserved.
@@ -16,36 +16,31 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
-	"strconv"
-
-	"github.com/kamalyes/go-toolbox/convert"
+	"time"
 )
 
-type DistributedId int64
+type Time time.Time
 
 // MarshalJSON 重写MarshalJSON方法
-func (t DistributedId) MarshalJSON() ([]byte, error) {
-	str := strconv.FormatInt(int64(t), 10)
+func (t Time) MarshalJSON() ([]byte, error) {
+	tTime := time.Time(t)
+	tStr := tTime.Format("2006-01-02 15:04:05")
 	// 注意 json 字符串风格要求
-	return []byte(fmt.Sprintf("\"%v\"", str)), nil
+	return []byte(fmt.Sprintf("\"%v\"", tStr)), nil
 }
 
 // Value 写入数据库之前，对数据做类型转换
-func (t DistributedId) Value() (driver.Value, error) {
+func (t Time) Value() (driver.Value, error) {
 	// DistributedId 转换成 int64 类型
-	num := int64(t)
-	return num, nil
+	tTime := time.Time(t)
+	return tTime, nil
 }
 
 // Scan 将数据库中取出的数据，赋值给目标类型
-func (t *DistributedId) Scan(v interface{}) error {
+func (t *Time) Scan(v interface{}) error {
 	switch v.(type) {
-	case []uint8:
-		numStr := convert.MustString(v.([]uint8))
-		num, _ := strconv.ParseInt(numStr, 10, 64)
-		*t = DistributedId(num)
-	case int64:
-		*t = DistributedId(v.(int64))
+	case time.Time:
+		*t = Time(v.(time.Time))
 	default:
 		val := reflect.ValueOf(v)
 		typ := reflect.Indirect(val).Type()

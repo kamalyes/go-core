@@ -18,9 +18,17 @@ import (
 	"github.com/kamalyes/go-core/jwt"
 )
 
-const (
-	ADMI = "ADMI"
-)
+var casbinAdmi = "km_casbin_admi"
+
+// SetCasbinAdmi 设置casbin_admi常量的值
+func SetCasbinAdmi(value string) {
+	casbinAdmi = value
+}
+
+// GetCasbinAdmi 获取casbin_admi常量的值
+func GetCasbinAdmi() string {
+	return casbinAdmi
+}
 
 // CasbinHandler Casbin权限认证
 func CasbinHandler() gin.HandlerFunc {
@@ -40,7 +48,7 @@ func CasbinHandler() gin.HandlerFunc {
 		permission := ctx.Request.URL.Path
 		method := ctx.Request.Method
 
-		if claims.UserType != ADMI {
+		if claims.UserType != GetCasbinAdmi() {
 			ok := CasbinServiceApp.PermissionVerify(user, permission, method)
 			if !ok {
 				ctx.JSON(http.StatusMethodNotAllowed, gin.H{

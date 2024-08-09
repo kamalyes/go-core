@@ -2,7 +2,7 @@
  * @Author: kamalyes 501893067@qq.com
  * @Date: 2023-07-28 00:50:58
  * @LastEditors: kamalyes 501893067@qq.com
- * @LastEditTime: 2024-07-28 23:01:03
+ * @LastEditTime: 2024-08-09 09:18:56
  * @FilePath: \go-core\minio\minio.go
  * @Description:
  *

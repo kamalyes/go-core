@@ -23,17 +23,13 @@ import (
 	"gorm.io/gorm"
 )
 
-const (
-	// DEF_SIGN_KEY 默认签名用的key
-	DEF_SIGN_KEY = "82011FC650590620FEFAC6500ADAB0F77"
-)
-
 // 定义一些常量
 var (
 	TokenExpired     error = errors.New("Token 已经过期")
 	TokenNotValidYet error = errors.New("Token 尚未激活")
 	TokenMalformed   error = errors.New("Token 格式错误")
 	TokenInvalid     error = errors.New("Token 无法解析")
+	jwtSignKey             = "82011FC650590620FEFAC6500ADAB0F77" // 默认签名用的key
 )
 
 // JWT jwt签名结构
@@ -41,18 +37,19 @@ type JWT struct {
 	SigningKey []byte
 }
 
-// NewJWT 新建一个 jwt 实例
-func NewJWT() *JWT {
-	return &JWT{[]byte(GetSignKey())}
+// SetJWTSignKey 动态设置JWT签名密钥
+func SetJWTSignKey(key string) {
+	jwtSignKey = key
 }
 
-// GetSignKey 获取 signKey
-func GetSignKey() string {
-	key := global.CONFIG.JWT.SigningKey
-	if key == "" {
-		return DEF_SIGN_KEY
-	}
-	return key
+// GetJWTSignKey 获取JWT签名密钥
+func GetJWTSignKey() string {
+	return jwtSignKey
+}
+
+// NewJWT 新建一个 jwt 实例
+func NewJWT() *JWT {
+	return &JWT{[]byte(GetJWTSignKey())}
 }
 
 // RegisteredClaims expiresAt 过期时间单位秒
@@ -105,62 +102,93 @@ func DeleteToken(userId string) (err error) {
 
 // ResolveToken 解析token
 func (j *JWT) ResolveToken(tokenString string) (*CustomClaims, error) {
-	token, err := jwt.ParseWithClaims(tokenString, &CustomClaims{}, func(token *jwt.Token) (interface{}, error) {
+	token, parseErr := jwt.ParseWithClaims(tokenString, &CustomClaims{}, func(token *jwt.Token) (interface{}, error) {
 		return j.SigningKey, nil
 	})
-	if err != nil {
-		if ve, ok := err.(*jwt.ValidationError); ok {
-			if ve.Errors&jwt.ValidationErrorMalformed != 0 {
-				return nil, TokenMalformed
-			} else if ve.Errors&jwt.ValidationErrorExpired != 0 {
-				return nil, TokenExpired
-			} else if ve.Errors&jwt.ValidationErrorNotValidYet != 0 {
-				return nil, TokenNotValidYet
-			} else {
-				return nil, TokenInvalid
-			}
-		}
+	if parseErr != nil {
+		return handleTokenParseError(parseErr)
 	}
-	if token != nil {
-		if claims, ok := token.Claims.(*CustomClaims); ok && token.Valid {
-			// 判断多点登录拦截是否开启
-			if global.CONFIG.JWT.UseMultipoint {
-				clis := CustomClaims{}
-				if global.REDIS != nil {
-					jsonStr, err := global.REDIS.Get(context.Background(), claims.UserId).Result()
-					if err == redis.Nil {
-						return claims, nil
-					}
-					if jsonStr != "" {
-						_ = json.Unmarshal([]byte(jsonStr), &clis)
-						if clis.TokenId == "" {
-							return claims, nil
-						} else {
-							if claims.TokenId == clis.TokenId {
-								return claims, nil
-							} else {
-								return nil, errors.New("账号已在其他地方登录，您已被迫下线")
-							}
-						}
-					}
-					global.LOG.Error("从redis获取用户token异常：" + err.Error())
-					return nil, errors.New("从redis获取用户token异常：" + err.Error())
-				}
-				err := global.DB.Where("user_id = ?", claims.UserId).First(&clis).Error
-				if err != nil && err != gorm.ErrRecordNotFound {
-					global.LOG.Error("从数据库获取用户token异常：" + err.Error())
-					return nil, errors.New("从数据库获取用户token异常：" + err.Error())
-				}
-				if claims.TokenId == clis.TokenId {
-					return claims, nil
-				} else {
-					return nil, errors.New("账号已在其他地方登录，您已被迫下线")
-				}
-			}
+
+	if token != nil && token.Valid {
+		claims, ok := token.Claims.(*CustomClaims)
+		if !ok {
+			return nil, TokenInvalid
+		}
+
+		if !j.isMultipointAuthEnabled(claims) {
 			return claims, nil
 		}
+
+		if err := j.checkMultipointAuth(claims); err != nil {
+			return nil, err
+		}
+
+		return claims, nil
 	}
+
 	return nil, TokenInvalid
+}
+
+// handleTokenParseError 处理token解析错误
+func handleTokenParseError(err error) (*CustomClaims, error) {
+	if ve, ok := err.(*jwt.ValidationError); ok {
+		switch {
+		case ve.Errors&jwt.ValidationErrorMalformed != 0:
+			return nil, TokenMalformed
+		case ve.Errors&jwt.ValidationErrorExpired != 0:
+			return nil, TokenExpired
+		case ve.Errors&jwt.ValidationErrorNotValidYet != 0:
+			return nil, TokenNotValidYet
+		default:
+			return nil, TokenInvalid
+		}
+	}
+	return nil, err
+}
+
+// isMultipointAuthEnabled 检查是否启用多点登录拦截
+func (j *JWT) isMultipointAuthEnabled(claims *CustomClaims) bool {
+	return global.CONFIG.JWT.UseMultipoint
+}
+
+// checkMultipointAuth 检查多点登录验证
+func (j *JWT) checkMultipointAuth(claims *CustomClaims) error {
+	if global.REDIS != nil {
+		if jsonStr, err := global.REDIS.Get(context.Background(), claims.UserId).Result(); err == redis.Nil || jsonStr == "" {
+			return nil
+		} else {
+			return j.checkRedisMultipointAuth(claims, jsonStr)
+		}
+	}
+	return j.checkDBMultipointAuth(claims)
+}
+
+// checkRedisMultipointAuth 检查Redis中的多点登录验证
+func (j *JWT) checkRedisMultipointAuth(claims *CustomClaims, jsonStr string) error {
+	var clis CustomClaims
+	if err := json.Unmarshal([]byte(jsonStr), &clis); err != nil {
+		return errors.New("解析Redis中的用户token时出错: " + err.Error())
+	}
+
+	if clis.TokenId != "" && claims.TokenId != clis.TokenId {
+		return errors.New("账号已在其他地方登录，您已被迫下线")
+	}
+
+	return nil
+}
+
+// checkDBMultipointAuth 检查数据库中的多点登录验证
+func (j *JWT) checkDBMultipointAuth(claims *CustomClaims) error {
+	var clis CustomClaims
+	if err := global.DB.Where("user_id = ?", claims.UserId).First(&clis).Error; err != nil && err != gorm.ErrRecordNotFound {
+		return errors.New("从数据库获取用户token异常：" + err.Error())
+	}
+
+	if claims.TokenId != clis.TokenId {
+		return errors.New("账号已在其他地方登录，您已被迫下线")
+	}
+
+	return nil
 }
 
 // RefreshToken 更新token

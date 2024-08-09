@@ -2,7 +2,7 @@
  * @Author: kamalyes 501893067@qq.com
  * @Date: 2023-07-28 00:50:58
  * @LastEditors: kamalyes 501893067@qq.com
- * @LastEditTime: 2024-07-28 22:06:11
+ * @LastEditTime: 2024-08-08 15:34:14
  * @FilePath: \go-core\global\model.go
  * @Description:
  *
@@ -14,7 +14,7 @@ package global
 import (
 	"time"
 
-	"github.com/kamalyes/go-core/dtype"
+	"github.com/kamalyes/go-core/internal/dtype"
 )
 
 type Model struct {

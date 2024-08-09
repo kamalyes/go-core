@@ -1,0 +1,2 @@
+test_key: 小明全名={{.Name}},年龄={{.Age}}
+error_key: 中文错误

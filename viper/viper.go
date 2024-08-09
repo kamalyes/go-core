@@ -2,8 +2,8 @@
  * @Author: kamalyes 501893067@qq.com
  * @Date: 2023-07-28 00:50:58
  * @LastEditors: kamalyes 501893067@qq.com
- * @LastEditTime: 2024-07-28 09:16:39
- * @FilePath: \go-core\mqtt\mqtt.go
+ * @LastEditTime: 2024-08-08 15:15:36
+ * @FilePath: \go-core\viper\viper.go
  * @Description:
  *
  * Copyright (c) 2024 by kamalyes, All Rights Reserved.
@@ -35,11 +35,11 @@ const (
 func Viper(path ...string) *viper.Viper {
 	v := viper.New()
 	if len(path) == 0 {
-		fname := global.ENV.Value() + ConfigSuffix
-		v.SetConfigName(fname)
+		fileName := global.ENV.Value() + ConfigSuffix
+		v.SetConfigName(fileName)
 		v.SetConfigType(ConfigType)
 		v.AddConfigPath(ConfigPath)
-		log.Println("读取配置文件:", fname)
+		log.Println("读取配置文件:", fileName)
 	} else {
 		v.SetConfigFile(path[0])
 		log.Println("读取指定配置文件:", path[0])

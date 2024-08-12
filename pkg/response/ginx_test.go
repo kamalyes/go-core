@@ -2,7 +2,7 @@
  * @Author: kamalyes 501893067@qq.com
  * @Date: 2023-07-28 00:50:58
  * @LastEditors: kamalyes 501893067@qq.com
- * @LastEditTime: 2024-08-10 23:41:12
+ * @LastEditTime: 2024-08-12 19:37:30
  * @FilePath: \go-core\pkg\response\ginx_test.go
  * @Description:
  *
@@ -71,34 +71,47 @@ func TestResponse(t *testing.T) {
 }
 
 func TestMerge(t *testing.T) {
-	// 创建初始 ResponseOption
-	initialRespOption := &ResponseOption{}
-
-	// 创建要合并的 ResponseOption
-	mergeRespOption := &ResponseOption{
-		Code:     300,
-		Data:     "Merged Data",
-		Message:  "Merged Message",
-		HttpCode: 500,
-	}
+	// 初始化一个Response
+	initRespOption := &ResponseOption{}
 
 	// 执行 merge 操作
-	initialRespOption.merge(mergeRespOption)
+	initRespOption.merge()
 
 	// 检查合并后的字段是否符合预期
-	if initialRespOption.Code != mergeRespOption.Code {
-		t.Errorf("Expected merged code to be %d, but got %d", mergeRespOption.Code, initialRespOption.Code)
+	if initRespOption.Code != SUCCESS {
+		t.Errorf("Expected initRespOption merged code to be %d", initRespOption.Code)
 	}
 
-	if initialRespOption.Data != mergeRespOption.Data {
-		t.Errorf("Expected merged data to be %s, but got %s", mergeRespOption.Data, initialRespOption.Data)
+	if initRespOption.Data != nil {
+		t.Errorf("Expected initRespOption merged data to be %s", initRespOption.Data)
 	}
 
-	if initialRespOption.Message != mergeRespOption.Message {
-		t.Errorf("Expected message to remain %s, but got %s", mergeRespOption.Message, initialRespOption.Message)
+	if initRespOption.Message != GetBusinessCodeMsg(SUCCESS) {
+		t.Errorf("Expected initRespOption message to remain %s", initRespOption.Message)
 	}
 
-	if initialRespOption.HttpCode != mergeRespOption.HttpCode {
-		t.Errorf("Expected HTTP code to remain %d, but got %d", mergeRespOption.HttpCode, initialRespOption.HttpCode)
+	if initRespOption.HttpCode != SUCCESS {
+		t.Errorf("Expected initRespOption HTTP code to remain %d", initRespOption.HttpCode)
 	}
+
+	// 定义新的自定义模型
+	mergeRespOption := &ResponseOption{
+		Code:     FAIL,
+		HttpCode: FAIL,
+	}
+	mergeRespOption.merge()
+	if mergeRespOption.Code != FAIL || mergeRespOption.HttpCode != FAIL {
+		t.Errorf("Expected mergeRespOption HTTP code to remain %d", mergeRespOption.HttpCode)
+	}
+
+	if mergeRespOption.Message != GetBusinessCodeMsg(SUCCESS) {
+		t.Errorf("Expected mergeRespOption message to remain %s", mergeRespOption.Message)
+	}
+
+	mergeRespOption.Message = "1235678"
+	mergeRespOption.merge()
+	if mergeRespOption.Message != "1235678" {
+		t.Errorf("Expected mergeRespOption message to remain %s", mergeRespOption.Message)
+	}
+
 }

@@ -2,8 +2,8 @@
  * @Author: kamalyes 501893067@qq.com
  * @Date: 2023-07-28 00:50:58
  * @LastEditors: kamalyes 501893067@qq.com
- * @LastEditTime: 2024-08-12 13:45:35
- * @FilePath: \go-core\database\gorm.go
+ * @LastEditTime: 2024-08-12 13:55:35
+ * @FilePath: \go-core\database\client.go
  * @Description:
  *
  * Copyright (c) 2024 by kamalyes, All Rights Reserved.

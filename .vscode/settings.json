@@ -134,6 +134,7 @@
       "dtype",
       "fsnotify",
       "fvbock",
+      "ginx",
       "goconfig",
       "gonic",
       "Gorm",

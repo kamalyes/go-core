@@ -2,7 +2,7 @@
  * @Author: kamalyes 501893067@qq.com
  * @Date: 2023-07-28 00:50:58
  * @LastEditors: kamalyes 501893067@qq.com
- * @LastEditTime: 2024-08-06 10:58:55
+ * @LastEditTime: 2024-08-12 13:39:31
  * @FilePath: \go-core\global\global.go
  * @Description:
  *
@@ -59,4 +59,6 @@ var (
 
 	// Trans 全局validate翻译器
 	Trans ut.Translator
+
+	GPerFix = "goc_"
 )

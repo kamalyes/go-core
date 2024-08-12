@@ -11,6 +11,8 @@
 package jwt
 
 import (
+	"fmt"
+
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/kamalyes/go-core/global"
 	"go.uber.org/zap"
@@ -23,14 +25,15 @@ func AutoCreateTables() {
 			CustomClaims{},
 		)
 		if err != nil {
-			global.LOG.Error("自动创建CustomClaims表失败", zap.Any("err", err))
+			errMsgs := fmt.Sprintf("自动创建%s表失败", string(CustomClaims{}.TableName()))
+			global.LOG.Error(errMsgs, zap.Any("err", err))
 		}
 	}
 }
 
 // TableName 自定义表名
 func (CustomClaims) TableName() string {
-	return "custom_claims"
+	return global.GPerFix + "custom_claims"
 }
 
 // CustomClaims 基础 claims

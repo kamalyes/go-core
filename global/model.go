@@ -13,14 +13,15 @@ package global
 
 import (
 	"time"
-
-	"github.com/kamalyes/go-core/internal/dtype"
 )
 
+type DistributedId int64
+type TTime time.Time
+
 type Model struct {
-	ID         dtype.DistributedId `json:"id,omitempty"            gorm:"column:id;primary_key;"`
-	CreateTime dtype.Time          `json:"createTime,omitempty"    gorm:"column:create_time;comment:创建时间;"`
-	UpdateTime *dtype.Time         `json:"updateTime,omitempty"    gorm:"column:update_time;comment:更新时间;"`
+	ID         DistributedId `json:"id,omitempty"            gorm:"column:id;primary_key;"`
+	CreateTime TTime         `json:"createTime,omitempty"    gorm:"column:create_time;comment:创建时间;"`
+	UpdateTime TTime         `json:"updateTime,omitempty"    gorm:"column:update_time;comment:更新时间;"`
 }
 
 // CreateId
@@ -28,18 +29,7 @@ type Model struct {
  *  @Description: 创建一个分布式ID（雪花ID）
  *  @return DistributedId
  */
-func CreateId() dtype.DistributedId {
+func CreateId() DistributedId {
 	id := Node.Generate()
-	return dtype.DistributedId(id.Int64())
-}
-
-// CreateTime
-/**
- *  @Description: 创建一个时间戳
- *  @return Time
- */
-func CreateTime() dtype.Time {
-	t := time.Now()
-	tTime := dtype.Time(t)
-	return tTime
+	return DistributedId(id.Int64())
 }

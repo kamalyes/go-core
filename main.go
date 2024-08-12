@@ -1,30 +1,3 @@
-# go-core
-
-### 介绍
-
-go-core 是 go web 应用开发脚手架，从全局配置文件读取，zap日志组件始化，gorm数据库连接初始化，redis客户端初始化，http server启动等。最终实现简化流程、提高效率、统一规范。
-
-### 安装
-
-```bash
-go get -u github.com/kamalyes/go-core
-```
-
-### 例子
-
-默认的程序根目录下必须包含 resources 文件夹，且文件夹内必须有 active.yaml和四种不同环境的开发文件至少一种
-配置文件参考 <https://github.com/kamalyes/go-config> 库的resources目录下的配置文件
-
-```shell
-├── resources(项目整合配置文件示例)
-│   ├── active.yaml      配置指定要激活启用的配置文件
-│   └── dev_config.yaml  开发环境配置文件
-│   └── fat_config.yaml  功能验收测试环境配置文件
-│   └── pro_config.yaml  生产环境配置文件
-│   └── uat_config.yaml  用户验收测试环境配置文件
-```
-
-```go
 package main
 
 import (
@@ -75,4 +48,3 @@ func main() {
 	// 启动服务
 	srun.RunHttpServer(r)
 }
-```

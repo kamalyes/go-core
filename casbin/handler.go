@@ -15,10 +15,11 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/kamalyes/go-core/global"
 	"github.com/kamalyes/go-core/jwt"
 )
 
-var casbinAdmi = "km_casbin_admi"
+var casbinAdmi = global.GPerFix + "casbin_admi"
 
 // SetCasbinAdmi 设置casbin_admi常量的值
 func SetCasbinAdmi(value string) {

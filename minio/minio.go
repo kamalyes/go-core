@@ -25,7 +25,8 @@ import (
 )
 
 var (
-	once sync.Once
+	once    sync.Once
+	timeOut = 10
 )
 
 // Minio 初始z化minio客户端
@@ -71,10 +72,6 @@ func watch(ctx context.Context, status *bool, describe string, timeOut int) {
 		}
 	}
 }
-
-var (
-	timeOut = 10
-)
 
 // initBucket
 /**

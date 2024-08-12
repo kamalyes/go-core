@@ -2,7 +2,7 @@
  * @Author: kamalyes 501893067@qq.com
  * @Date: 2023-07-28 00:50:58
  * @LastEditors: kamalyes 501893067@qq.com
- * @LastEditTime: 2024-08-08 16:56:55
+ * @LastEditTime: 2024-08-12 13:56:35
  * @FilePath: \go-core\captcha\captcha.go
  * @Description:
  *
@@ -20,7 +20,7 @@ import (
 
 var (
 	expirationTime = time.Second * 180
-	perFixKey      = "km_captcha"
+	perFixKey      = global.GPerFix + "captcha"
 )
 
 type RedisStore struct {
@@ -64,6 +64,7 @@ func NewDefaultRedisStore() RedisStoreInterface {
 	return &RedisStore{
 		Expiration: GetExpirationTime(),
 		PrefixKey:  GetPerFixKey(),
+		Context:    context.Background(),
 	}
 }
 

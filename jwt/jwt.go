@@ -2,7 +2,7 @@
  * @Author: kamalyes 501893067@qq.com
  * @Date: 2023-07-28 00:50:58
  * @LastEditors: kamalyes 501893067@qq.com
- * @LastEditTime: 2024-08-01 11:02:00
+ * @LastEditTime: 2024-08-10 23:51:19
  * @FilePath: \go-core\jwt\jwt.go
  * @Description:
  *
@@ -115,7 +115,7 @@ func (j *JWT) ResolveToken(tokenString string) (*CustomClaims, error) {
 			return nil, TokenInvalid
 		}
 
-		if !j.isMultipointAuthEnabled(claims) {
+		if !j.isMultipointAuthEnabled() {
 			return claims, nil
 		}
 
@@ -147,7 +147,7 @@ func handleTokenParseError(err error) (*CustomClaims, error) {
 }
 
 // isMultipointAuthEnabled 检查是否启用多点登录拦截
-func (j *JWT) isMultipointAuthEnabled(claims *CustomClaims) bool {
+func (j *JWT) isMultipointAuthEnabled() bool {
 	return global.CONFIG.JWT.UseMultipoint
 }
 

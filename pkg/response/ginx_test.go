@@ -2,7 +2,7 @@
  * @Author: kamalyes 501893067@qq.com
  * @Date: 2023-07-28 00:50:58
  * @LastEditors: kamalyes 501893067@qq.com
- * @LastEditTime: 2024-08-10 23:41:12
+ * @LastEditTime: 2024-08-13 16:15:55
  * @FilePath: \go-core\pkg\response\ginx_test.go
  * @Description:
  *
@@ -16,6 +16,8 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
+	"github.com/kamalyes/go-core/pkg/httpx"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestSendResponse(t *testing.T) {
@@ -39,12 +41,12 @@ func TestSendResponse(t *testing.T) {
 
 func TestResponse(t *testing.T) {
 	testCases := []struct {
-		name     string
-		httpCode int
-		code     BusinessCode
-		data     interface{}
-		message  string
-		expected int
+		name           string
+		httpStatusCode httpx.StatusCode
+		code           SceneCode
+		data           interface{}
+		message        string
+		expected       int
 	}{
 		{"Test 1", 0, 0, "", "", 200},
 		{"Test 2", 200, http.StatusOK, "Data", "Success", http.StatusOK},
@@ -56,10 +58,10 @@ func TestResponse(t *testing.T) {
 			w := httptest.NewRecorder()
 			ctx, _ := gin.CreateTestContext(w)
 			option := ResponseOption{
-				Code:     tc.code,
-				HttpCode: tc.httpCode,
-				Data:     tc.data,
-				Message:  tc.message,
+				Code:       tc.code,
+				StatusCode: tc.httpStatusCode,
+				Data:       tc.data,
+				Message:    tc.message,
 			}
 			GenResponse(ctx, &option)
 
@@ -71,34 +73,84 @@ func TestResponse(t *testing.T) {
 }
 
 func TestMerge(t *testing.T) {
-	// 创建初始 ResponseOption
-	initialRespOption := &ResponseOption{}
-
-	// 创建要合并的 ResponseOption
-	mergeRespOption := &ResponseOption{
-		Code:     300,
-		Data:     "Merged Data",
-		Message:  "Merged Message",
-		HttpCode: 500,
-	}
+	// 初始化一个Response
+	initRespOption := &ResponseOption{}
 
 	// 执行 merge 操作
-	initialRespOption.merge(mergeRespOption)
+	initRespOption.merge()
 
 	// 检查合并后的字段是否符合预期
-	if initialRespOption.Code != mergeRespOption.Code {
-		t.Errorf("Expected merged code to be %d, but got %d", mergeRespOption.Code, initialRespOption.Code)
+	if initRespOption.Code != SceneCode(httpx.StatusOK) {
+		t.Errorf("Expected initRespOption merged code to be %d", initRespOption.Code)
 	}
 
-	if initialRespOption.Data != mergeRespOption.Data {
-		t.Errorf("Expected merged data to be %s, but got %s", mergeRespOption.Data, initialRespOption.Data)
+	if initRespOption.Data != nil {
+		t.Errorf("Expected initRespOption merged data to be %s", initRespOption.Data)
 	}
 
-	if initialRespOption.Message != mergeRespOption.Message {
-		t.Errorf("Expected message to remain %s, but got %s", mergeRespOption.Message, initialRespOption.Message)
+	if initRespOption.Message != GetSceneCodeMsg(SceneCode(httpx.StatusOK)) {
+		t.Errorf("Expected initRespOption message to remain %s", initRespOption.Message)
 	}
 
-	if initialRespOption.HttpCode != mergeRespOption.HttpCode {
-		t.Errorf("Expected HTTP code to remain %d, but got %d", mergeRespOption.HttpCode, initialRespOption.HttpCode)
+	if initRespOption.StatusCode != Success {
+		t.Errorf("Expected initRespOption HTTP code to remain %d", initRespOption.StatusCode)
 	}
+
+	// 定义新的自定义模型
+	newCode := SceneCode(36666)
+	newHttpStatusCode := httpx.StatusInternalServerError
+	mergeRespOption := &ResponseOption{
+		Code:       newCode,
+		StatusCode: newHttpStatusCode,
+	}
+	mergeRespOption.merge()
+	if mergeRespOption.Code != newCode || mergeRespOption.StatusCode != newHttpStatusCode {
+		t.Errorf("Expected mergeRespOption HTTP code to remain %d", mergeRespOption.StatusCode)
+	}
+
+	if mergeRespOption.Message != httpx.GetStatusCodeText(newHttpStatusCode) {
+		t.Errorf("Expected mergeRespOption message to remain %s", mergeRespOption.Message)
+	}
+
+	newMessage := "1235678"
+	mergeRespOption.Message = newMessage
+	mergeRespOption.merge()
+	if mergeRespOption.Message != newMessage {
+		t.Errorf("Expected mergeRespOption message to remain %s", mergeRespOption.Message)
+	}
+
+}
+
+func TestGen400xResponse(t *testing.T) {
+	router := gin.Default()
+
+	router.GET("/testGen400xResponse", func(c *gin.Context) {
+		Gen400xResponse(c, nil)
+	})
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/testGen400xResponse", nil)
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+	// 校验响应体内容
+	expectedJSON := "{\"data\":null,\"code\":400,\"message\":\"Bad Request\"}"
+	assert.JSONEq(t, expectedJSON, w.Body.String())
+}
+
+func TestGen500xResponse(t *testing.T) {
+	router := gin.Default()
+
+	router.GET("/testGen500xResponse", func(c *gin.Context) {
+		Gen500xResponse(c, nil)
+	})
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/testGen500xResponse", nil)
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
+	// 校验响应体内容
+	expectedJSON := "{\"data\":null,\"code\":500,\"message\":\"Fail\"}"
+	assert.JSONEq(t, expectedJSON, w.Body.String())
 }

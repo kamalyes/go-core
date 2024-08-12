@@ -33,3 +33,14 @@ func CreateId() DistributedId {
 	id := Node.Generate()
 	return DistributedId(id.Int64())
 }
+
+// CreateTime
+/**
+ *  @Description: 创建一个时间戳
+ *  @return Time
+ */
+func CreateTime() TTime {
+	t := time.Now()
+	tTime := TTime(t)
+	return tTime
+}

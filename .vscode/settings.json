@@ -138,6 +138,7 @@
       "goconfig",
       "gonic",
       "Gorm",
+      "httpx",
       "kamalyes",
       "mapstructure",
       "minio",

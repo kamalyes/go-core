@@ -22,14 +22,14 @@ import (
 // HandleValidatorError 处理字段校验异常
 func HandleValidatorError(ctx *gin.Context, err error) {
 	if errs, ok := err.(validator.ValidationErrors); ok {
-		response.GenResponse(ctx, &response.ResponseOption{
+		response.Gen400xResponse(ctx, &response.ResponseOption{
 			Code: response.ValidateError,
 			Data: removeTopStruct(errs.Translate(global.Trans)),
 		})
 		return
 	}
 
-	response.GenResponse(ctx, &response.ResponseOption{Message: err.Error()})
+	response.Gen400xResponse(ctx, &response.ResponseOption{Message: err.Error()})
 }
 
 // removeTopStruct 定义一个去掉结构体名称前缀的自定义方法：

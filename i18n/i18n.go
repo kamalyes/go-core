@@ -2,7 +2,7 @@
  * @Author: kamalyes 501893067@qq.com
  * @Date: 2024-08-08 17:15:56
  * @LastEditors: kamalyes 501893067@qq.com
- * @LastEditTime: 2024-08-09 17:28:54
+ * @LastEditTime: 2024-10-15 19:28:33
  * @FilePath: \go-core\i18n\i18n.go
  * @Description:
  *
@@ -16,7 +16,6 @@ import (
 	"os"
 	"strings"
 	"sync"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/nicksnyder/go-i18n/v2/i18n"
@@ -25,11 +24,10 @@ import (
 )
 
 var (
-	I18n              = new(i18n.Localizer)
-	defaultDateFormat = "2006-01-02 15:05:05"
-	earsLang          = Language("en") // 兜底语言
-	currentLang       = earsLang       // 全局变量用来存储lang值
-	langMutex         sync.Mutex
+	I18n        = new(i18n.Localizer)
+	earsLang    = Language("en") // 兜底语言
+	currentLang = earsLang       // 全局变量用来存储lang值
+	langMutex   sync.Mutex
 	//go:embed lang/*
 	fs     embed.FS
 	bundle *i18n.Bundle
@@ -113,24 +111,6 @@ func (lang Language) ToTextLanguage() language.Tag {
 	return language.Make(string(lang))
 }
 
-// ConvertStringToTimestamp String时间类型转换为时间戳
-func ConvertStringToTimestamp(dateString, layout string, timeZone string) (int64, error) {
-	// 加载时区
-	loc, err := time.LoadLocation(timeZone)
-	if err != nil {
-		return 0, err
-	}
-
-	// 将字符串解析为时间
-	t, err := time.ParseInLocation(layout, dateString, loc)
-	if err != nil {
-		return 0, err
-	}
-	// 转换时间为时间戳
-	timestamp := t.Unix()
-	return timestamp, nil
-}
-
 // GetMsgWithMap 获取变量值
 func GetMsgWithMap(key string, maps map[string]interface{}) string {
 	I18n := i18n.NewLocalizer(bundle, GetCurrentLang())
@@ -166,37 +146,17 @@ func GetMsgByKey(key string) string {
 	return content
 }
 
-// GetTimeOffset 国际化时间戳偏移
-func GetTimeOffset(timezone string, ts int64) (offset int) {
-	var loc, _ = time.LoadLocation(timezone)
-	_, offset = time.Unix(ts, 0).In(loc).Zone()
-	return
-}
-
-// FormatWithLocation 国际化时间戳转换字符串
-func FormatWithLocation(timezone string, ts int64) string {
-	lt, _ := time.LoadLocation(timezone)
-	str := time.Unix(ts, 0).In(lt).Format(defaultDateFormat)
-	return str
-}
-
-// ParseWithLocation 国际化时间字符串转换时间戳
-func ParseWithLocation(timezone string, timeStr string) int64 {
-	l, _ := time.LoadLocation(timezone)
-	lt, _ := time.ParseInLocation(defaultDateFormat, timeStr, l)
-	return lt.Unix()
-}
-
 // UseI18n gin框架使用
 func UseI18n() gin.HandlerFunc {
-	return func(context *gin.Context) {
-		acceptLang := context.GetHeader("Accept-Language")
+	return func(ctx *gin.Context) {
+		acceptLang := ctx.GetHeader("Accept-Language")
 		if _, ok := SupportedLanguages[Language(acceptLang)]; ok {
 			currentLang = Language(acceptLang)
 		} else {
 			fmt.Printf("Request language (%s) not supported, current language (%s)", acceptLang, currentLang)
 		}
-		LoadMessageFileFS(Language(acceptLang))
+		LoadMessageFileFS(Language(currentLang))
+		ctx.Next()
 	}
 }
 

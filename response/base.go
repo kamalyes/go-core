@@ -12,15 +12,16 @@ package response
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/kamalyes/go-core/pkg/httpx"
+	"github.com/gofiber/fiber/v2"
+	"github.com/labstack/echo/v4"
 )
 
 // ResponseOption 是用于构建返回响应的结构体
 type ResponseOption struct {
-	Data       interface{}
-	Code       SceneCode
-	StatusCode httpx.StatusCode
-	Message    string
+	Data     interface{}
+	Code     SceneCode
+	HttpCode StatusCode
+	Message  string
 }
 
 // convertToSceneCode 辅助函数用于将输入值转换为 SceneCode 类型
@@ -35,12 +36,12 @@ func convertToSceneCode(val interface{}) SceneCode {
 }
 
 // convertToHttpStatusCode 辅助函数用于将输入值转换为 StatusCode 类型
-func convertToHttpStatusCode(val interface{}) httpx.StatusCode {
-	statusCode, ok := val.(httpx.StatusCode)
+func convertToHttpStatusCode(val interface{}) StatusCode {
+	statusCode, ok := val.(StatusCode)
 	if !ok {
-		return httpx.StatusCode(httpx.StatusOK)
+		return StatusCode(StatusOK)
 	}
-	return httpx.StatusCode(statusCode)
+	return StatusCode(statusCode)
 }
 
 // NewResponseOption 用于创建 ResponseOption 实例
@@ -53,8 +54,8 @@ func NewResponseOption(data interface{}, options ...interface{}) *ResponseOption
 		switch opt := option.(type) {
 		case SceneCode:
 			response.Code = opt
-		case httpx.StatusCode:
-			response.StatusCode = opt
+		case StatusCode:
+			response.HttpCode = opt
 		case string:
 			response.Message = opt
 
@@ -66,7 +67,7 @@ func NewResponseOption(data interface{}, options ...interface{}) *ResponseOption
 
 // Sub 用于在给定的上下文中生成响应
 func (o *ResponseOption) Sub(ctx *gin.Context) {
-	GenResponse(ctx, o)
+	GenGinResponse(ctx, o)
 }
 
 // merge 用于处理 ResponseOption 实例的属性值
@@ -75,14 +76,14 @@ func (o *ResponseOption) merge() *ResponseOption {
 	o.Code = convertToSceneCode(ternary(o.Code == 0, Success, o.Code))
 
 	// 根据条件将 o.StatusCode 的值进行转换
-	o.StatusCode = convertToHttpStatusCode(ternary(o.StatusCode == 0, httpx.StatusOK, o.StatusCode))
+	o.HttpCode = convertToHttpStatusCode(ternary(o.HttpCode == 0, StatusOK, o.HttpCode))
 
 	// 根据条件设置消息内容
 	if o.Message == "" {
 		o.Message = GetSceneCodeMsg(o.Code)
 	}
 	if o.Message == "" {
-		o.Message = httpx.GetStatusCodeText(o.StatusCode)
+		o.Message = GetStatusCodeText(o.HttpCode)
 	}
 
 	return o
@@ -96,40 +97,26 @@ func ternary(condition bool, trueVal, falseVal interface{}) interface{} {
 	return falseVal
 }
 
-// GenResponse 生成 JSON 格式的响应
-func GenResponse(ctx *gin.Context, respOption *ResponseOption) {
+// SendJSONResponse 生成 JSON 格式的响应
+func SendJSONResponse(c interface{}, respOption *ResponseOption) error {
 	if respOption == nil {
 		respOption = &ResponseOption{}
 	}
 	respOption.merge()
-	// 将 StatusCode 转换为 int 类型
-	statusCodeInt := int(respOption.StatusCode)
-	// 返回JSON格式的响应
+
 	// 创建一个map来存储不包含HttpStatusCode和Language的字段
 	cleanedResp := map[string]interface{}{
 		"data":    respOption.Data,
 		"code":    respOption.Code,
 		"message": respOption.Message,
 	}
-	ctx.JSON(statusCodeInt, cleanedResp)
-}
 
-// Gen400xResponse 生成 HTTP 400x 错误响应
-func Gen400xResponse(ctx *gin.Context, respOption *ResponseOption) {
-	if respOption == nil {
-		respOption = &ResponseOption{}
+	switch ctx := c.(type) {
+	case echo.Context:
+		return ctx.JSON(int(respOption.HttpCode), cleanedResp)
+	case *fiber.Ctx:
+		return ctx.Status(int(respOption.HttpCode)).JSON(cleanedResp)
+	default:
+		return nil // 或者返回一个错误，取决于需求
 	}
-	respOption.Code = BadRequest
-	respOption.StatusCode = httpx.StatusBadRequest
-	GenResponse(ctx, respOption)
-}
-
-// Gen500xResponse 生成 HTTP 500 错误响应
-func Gen500xResponse(ctx *gin.Context, respOption *ResponseOption) {
-	if respOption == nil {
-		respOption = &ResponseOption{}
-	}
-	respOption.Code = Fail
-	respOption.StatusCode = httpx.StatusInternalServerError
-	GenResponse(ctx, respOption)
 }

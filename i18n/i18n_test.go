@@ -20,8 +20,6 @@ import (
 )
 
 func TestAllI18nFunctions(t *testing.T) {
-	t.Run("TestConvertStringToTimestamp", TestConvertStringToTimestamp)
-	t.Run("TestFormatWithLocation", TestFormatWithLocation)
 	t.Run("TestGetMsgWithMap", TestGetMsgWithMap)
 	t.Run("TestGetMsgByKey", TestGetMsgByKey)
 	t.Run("TestIsValidLanguage", TestIsValidLanguage)
@@ -32,25 +30,6 @@ func TestAllI18nFunctions(t *testing.T) {
 	t.Run("TestMessageRetrieval", TestMessageRetrieval)
 	t.Run("TestRemoveLanguage", TestRemoveLanguage)
 
-}
-
-func TestConvertStringToTimestamp(t *testing.T) {
-	expectedTimestamp := int64(1628424042)
-	dateString := "2021-08-08 12:03:42"
-	layout := "2006-01-02 15:05:05"
-	timeZone := "UTC"
-
-	timestamp, err := ConvertStringToTimestamp(dateString, layout, timeZone)
-
-	assert.NoError(t, err)
-	assert.Equal(t, expectedTimestamp, timestamp, "Timestamps should match")
-}
-
-func TestFormatWithLocation(t *testing.T) {
-	expected := "2024-05-16 13:09:09"
-	timestamp := int64(1715867289) // This timestamp represents "2024-05-16 21:58:09" in UTC
-	formatted := FormatWithLocation("UTC", timestamp)
-	assert.Equal(t, expected, formatted)
 }
 
 func TestGetMsgWithMap(t *testing.T) {

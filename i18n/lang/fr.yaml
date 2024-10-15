@@ -1,2 +1,0 @@
-test_key : XianMing AllName={{.Name}} Age={{.Age}}
-error_key : FrError

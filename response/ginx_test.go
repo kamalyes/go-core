@@ -16,7 +16,6 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
-	"github.com/kamalyes/go-core/pkg/httpx"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -42,7 +41,7 @@ func TestSendResponse(t *testing.T) {
 func TestResponse(t *testing.T) {
 	testCases := []struct {
 		name           string
-		httpStatusCode httpx.StatusCode
+		httpStatusCode StatusCode
 		code           SceneCode
 		data           interface{}
 		message        string
@@ -58,12 +57,12 @@ func TestResponse(t *testing.T) {
 			w := httptest.NewRecorder()
 			ctx, _ := gin.CreateTestContext(w)
 			option := ResponseOption{
-				Code:       tc.code,
-				StatusCode: tc.httpStatusCode,
-				Data:       tc.data,
-				Message:    tc.message,
+				Code:     tc.code,
+				HttpCode: tc.httpStatusCode,
+				Data:     tc.data,
+				Message:  tc.message,
 			}
-			GenResponse(ctx, &option)
+			GenGinResponse(ctx, &option)
 
 			if w.Code != tc.expected {
 				t.Errorf("Expected %s status code: %d, got: %d", tc.name, tc.expected, w.Code)
@@ -80,7 +79,7 @@ func TestMerge(t *testing.T) {
 	initRespOption.merge()
 
 	// 检查合并后的字段是否符合预期
-	if initRespOption.Code != SceneCode(httpx.StatusOK) {
+	if initRespOption.Code != SceneCode(StatusOK) {
 		t.Errorf("Expected initRespOption merged code to be %d", initRespOption.Code)
 	}
 
@@ -88,27 +87,27 @@ func TestMerge(t *testing.T) {
 		t.Errorf("Expected initRespOption merged data to be %s", initRespOption.Data)
 	}
 
-	if initRespOption.Message != GetSceneCodeMsg(SceneCode(httpx.StatusOK)) {
+	if initRespOption.Message != GetSceneCodeMsg(SceneCode(StatusOK)) {
 		t.Errorf("Expected initRespOption message to remain %s", initRespOption.Message)
 	}
 
-	if initRespOption.StatusCode != Success {
-		t.Errorf("Expected initRespOption HTTP code to remain %d", initRespOption.StatusCode)
+	if initRespOption.HttpCode != Success {
+		t.Errorf("Expected initRespOption HTTP code to remain %d", initRespOption.HttpCode)
 	}
 
 	// 定义新的自定义模型
 	newCode := SceneCode(36666)
-	newHttpStatusCode := httpx.StatusInternalServerError
+	newHttpStatusCode := StatusInternalServerError
 	mergeRespOption := &ResponseOption{
-		Code:       newCode,
-		StatusCode: newHttpStatusCode,
+		Code:     newCode,
+		HttpCode: newHttpStatusCode,
 	}
 	mergeRespOption.merge()
-	if mergeRespOption.Code != newCode || mergeRespOption.StatusCode != newHttpStatusCode {
-		t.Errorf("Expected mergeRespOption HTTP code to remain %d", mergeRespOption.StatusCode)
+	if mergeRespOption.Code != newCode || mergeRespOption.HttpCode != newHttpStatusCode {
+		t.Errorf("Expected mergeRespOption HTTP code to remain %d", mergeRespOption.HttpCode)
 	}
 
-	if mergeRespOption.Message != httpx.GetStatusCodeText(newHttpStatusCode) {
+	if mergeRespOption.Message != GetStatusCodeText(newHttpStatusCode) {
 		t.Errorf("Expected mergeRespOption message to remain %s", mergeRespOption.Message)
 	}
 
@@ -121,15 +120,15 @@ func TestMerge(t *testing.T) {
 
 }
 
-func TestGen400xResponse(t *testing.T) {
+func TestGenGin400xResponse(t *testing.T) {
 	router := gin.Default()
 
-	router.GET("/testGen400xResponse", func(c *gin.Context) {
-		Gen400xResponse(c, nil)
+	router.GET("/testGenGin400xResponse", func(c *gin.Context) {
+		GenGin400xResponse(c, nil)
 	})
 
 	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", "/testGen400xResponse", nil)
+	req, _ := http.NewRequest("GET", "/testGenGin400xResponse", nil)
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusBadRequest, w.Code)
@@ -138,15 +137,15 @@ func TestGen400xResponse(t *testing.T) {
 	assert.JSONEq(t, expectedJSON, w.Body.String())
 }
 
-func TestGen500xResponse(t *testing.T) {
+func TestGenGin500xResponse(t *testing.T) {
 	router := gin.Default()
 
-	router.GET("/testGen500xResponse", func(c *gin.Context) {
-		Gen500xResponse(c, nil)
+	router.GET("/testGenGin500xResponse", func(c *gin.Context) {
+		GenGin500xResponse(c, nil)
 	})
 
 	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", "/testGen500xResponse", nil)
+	req, _ := http.NewRequest("GET", "/testGenGin500xResponse", nil)
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusInternalServerError, w.Code)

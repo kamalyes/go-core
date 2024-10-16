@@ -17,7 +17,7 @@ require (
 	github.com/go-redis/redis/v8 v8.11.0
 	github.com/gofiber/fiber/v2 v2.52.5
 	github.com/golang-jwt/jwt/v4 v4.5.0
-	github.com/kamalyes/go-config v0.0.5
+	github.com/kamalyes/go-config v0.2.0
 	github.com/labstack/echo/v4 v4.12.0
 	github.com/minio/minio-go/v7 v7.0.74
 	github.com/spf13/viper v1.19.0

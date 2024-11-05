@@ -1,5 +1,19 @@
 # go-core
 
+[![stable](https://img.shields.io/badge/stable-stable-green.svg)](https://github.com/kamalyes/go-core)
+[![license](https://img.shields.io/github/license/kamalyes/go-core)]()
+[![download](https://img.shields.io/github/downloads/kamalyes/go-core/total)]()
+[![release](https://img.shields.io/github/v/release/kamalyes/go-core)]()
+[![commit](https://img.shields.io/github/last-commit/kamalyes/go-core)]()
+[![issues](https://img.shields.io/github/issues/kamalyes/go-core)]()
+[![pull](https://img.shields.io/github/issues-pr/kamalyes/go-core)]()
+[![fork](https://img.shields.io/github/forks/kamalyes/go-core)]()
+[![star](https://img.shields.io/github/stars/kamalyes/go-core)]()
+[![go](https://img.shields.io/github/go-mod/go-version/kamalyes/go-core)]()
+[![size](https://img.shields.io/github/repo-size/kamalyes/go-core)]()
+[![contributors](https://img.shields.io/github/contributors/kamalyes/go-core)]()
+
+
 ### 介绍
 
 go-core 是 go web 应用开发脚手架，从全局配置文件读取，zap日志组件始化，gorm数据库连接初始化，redis客户端初始化，http server启动等。最终实现简化流程、提高效率、统一规范。
@@ -12,12 +26,11 @@ go get -u github.com/kamalyes/go-core
 
 ### 例子
 
-默认的程序根目录下必须包含 resources 文件夹，且文件夹内必须有 active.yaml和四种不同环境的开发文件至少一种
+默认的程序根目录下必须包含 resources 文件夹，且文件夹内必须有不同环境的开发文件至少一种
 配置文件参考 <https://github.com/kamalyes/go-config> 库的resources目录下的配置文件
 
 ```shell
 ├── resources(项目整合配置文件示例)
-│   ├── active.yaml      配置指定要激活启用的配置文件
 │   └── dev_config.yaml  开发环境配置文件
 │   └── fat_config.yaml  功能验收测试环境配置文件
 │   └── pro_config.yaml  生产环境配置文件
@@ -30,21 +43,17 @@ package main
 import (
 	"github.com/gin-gonic/gin"
 	goconfig "github.com/kamalyes/go-config"
-	"github.com/kamalyes/go-config/env"
-	"github.com/kamalyes/go-core/database"
-	"github.com/kamalyes/go-core/global"
-	"github.com/kamalyes/go-core/minio"
-	"github.com/kamalyes/go-core/mqtt"
-	"github.com/kamalyes/go-core/redis"
-	"github.com/kamalyes/go-core/srun"
-	"github.com/kamalyes/go-core/zap"
+	"github.com/kamalyes/go-config/pkg/env"
+	"github.com/kamalyes/go-core/pkg/database"
+	"github.com/kamalyes/go-core/pkg/global"
+	"github.com/kamalyes/go-core/pkg/minio"
+	"github.com/kamalyes/go-core/pkg/mqtt"
+	"github.com/kamalyes/go-core/pkg/redis"
+	"github.com/kamalyes/go-core/pkg/srun"
+	"github.com/kamalyes/go-core/pkg/zap"
 )
 
 func main() {
-
-	// 获取程序运行环境，默认会读取 resources/active.yaml 文件中配置的运行环境
-	global.ENV = env.Active()
-
 	// 获取全局配置,默认根据运行环境加载对应配置文件
 	global.CONFIG = goconfig.GlobalConfig()
 

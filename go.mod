@@ -7,7 +7,7 @@ require (
 	github.com/asim/go-micro/v3 v3.7.0
 	github.com/bwmarrin/snowflake v0.3.0
 	github.com/casbin/casbin/v2 v2.98.0
-	github.com/casbin/gorm-adapter/v3 v3.26.0
+	github.com/casbin/gorm-adapter/v3 v3.28.0
 	github.com/eclipse/paho.mqtt.golang v1.5.0
 	github.com/fvbock/endless v0.0.0-20170109170031-447134032cb6
 	github.com/gin-gonic/gin v1.10.0

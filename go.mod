@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	github.com/asim/go-micro/plugins/registry/consul/v3 v3.7.0
-	github.com/asim/go-micro/v3 v3.7.0
+	github.com/asim/go-micro/v3 v3.7.1
 	github.com/bwmarrin/snowflake v0.3.0
 	github.com/casbin/casbin/v2 v2.98.0
 	github.com/casbin/gorm-adapter/v3 v3.26.0

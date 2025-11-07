@@ -2,8 +2,8 @@
  * @Author: kamalyes 501893067@qq.com
  * @Date: 2023-07-28 00:50:58
  * @LastEditors: kamalyes 501893067@qq.com
- * @LastEditTime: 2024-08-05 15:15:15
- * @FilePath: \go-core\pkg\page\go
+ * @LastEditTime: 2025-11-07 10:28:19
+ * @FilePath: \go-core\pkg\database\page.go
  * @Description:
  *
  * Copyright (c) 2024 by kamalyes, All Rights Reserved.
@@ -113,6 +113,138 @@ type PageInfo struct {
 	OrderStr string
 }
 
+// parseBasicParams 解析基础分页参数
+func parseBasicParams(key, value string, pageInfo *PageInfo) bool {
+	switch key {
+	case "current":
+		current, err := strconv.Atoi(value)
+		if err != nil {
+			current = 1
+		}
+		if current < 1 {
+			current = 1
+		}
+		pageInfo.Current = current
+		return true
+	case "rowCount":
+		rowCount, err := strconv.Atoi(value)
+		if err != nil {
+			rowCount = 10
+		}
+		if rowCount < 1 {
+			rowCount = 10
+		} else if rowCount > 100 {
+			rowCount = 100
+		}
+		pageInfo.RowCount = rowCount
+		return true
+	case "orderStr":
+		pageInfo.OrderStr = value
+		return true
+	case "tableName":
+		pageInfo.TableName = value
+		return true
+	}
+	return false
+}
+
+// parseAndCondition 解析AND条件参数
+func parseAndCondition(key, value string, andParams map[string]interface{}) bool {
+	key = CamelToCase(key)
+	
+	switch {
+	case strings.Index(value, lt) == 0:
+		value = strings.Replace(value, lt, "", 1)
+		if value != "" {
+			andParams[key+" < ?"] = value
+		}
+	case strings.Index(value, lte) == 0:
+		value = strings.Replace(value, lte, "", 1)
+		if value != "" {
+			andParams[key+" <= ?"] = value
+		}
+	case strings.Index(value, gt) == 0:
+		value = strings.Replace(value, gt, "", 1)
+		if value != "" {
+			andParams[key+" > ?"] = value
+		}
+	case strings.Index(value, gte) == 0:
+		value = strings.Replace(value, gte, "", 1)
+		if value != "" {
+			andParams[key+" >= ?"] = value
+		}
+	case strings.Index(value, lk) == 0:
+		value = strings.Replace(value, lk, "", 1)
+		if value != "" {
+			andParams[key+" LIKE ?"] = value + "%"
+		}
+	case strings.Index(value, eq) == 0:
+		value = strings.Replace(value, eq, "", 1)
+		if value != "" {
+			andParams[key+" = ?"] = value
+		}
+	default:
+		// 默认等于条件
+		if value != "" {
+			andParams[key+" = ?"] = value
+		}
+	}
+	return true
+}
+
+// parseOrCondition 解析OR条件参数
+func parseOrCondition(key, value string, orParams map[string]interface{}) bool {
+	key = CamelToCase(key)
+	
+	switch {
+	case strings.Index(value, orlt) == 0:
+		value = strings.Replace(value, orlt, "", 1)
+		if value != "" {
+			orParams[key+" < ?"] = value
+		}
+	case strings.Index(value, orlte) == 0:
+		value = strings.Replace(value, orlte, "", 1)
+		if value != "" {
+			orParams[key+" <= ?"] = value
+		}
+	case strings.Index(value, orgte) == 0:
+		value = strings.Replace(value, orgte, "", 1)
+		if value != "" {
+			orParams[key+" >= ?"] = value
+		}
+	case strings.Index(value, orgt) == 0:
+		value = strings.Replace(value, orgt, "", 1)
+		if value != "" {
+			orParams[key+" > ?"] = value
+		}
+	case strings.Index(value, orlk) == 0:
+		value = strings.Replace(value, orlk, "", 1)
+		if value != "" {
+			orParams[key+" LIKE ?"] = value + "%"
+		}
+	case strings.Index(value, oreq) == 0:
+		value = strings.Replace(value, oreq, "", 1)
+		if value != "" {
+			orParams[key+" = ?"] = value
+		}
+	default:
+		return false
+	}
+	return true
+}
+
+// processOrderString 处理排序字符串
+func processOrderString(orderStr string) string {
+	if orderStr == "" {
+		return ""
+	}
+	v := CamelToCase(orderStr)
+	v = strings.ReplaceAll(v, pd, " desc,")
+	v = strings.ReplaceAll(v, pa, " asc,")
+	v = strings.TrimSuffix(v, ",")
+	return v
+}
+
 // PageParam 获取url查询参数
 func PageParam(c *gin.Context) *PageInfo {
 	s := c.Request.URL.RawQuery
@@ -121,153 +253,42 @@ func PageParam(c *gin.Context) *PageInfo {
 		log.Println("url参数decode异常：" + err.Error())
 		return nil
 	}
+	
 	pageInfo := PageInfo{}
 	andParams := make(map[string]interface{})
 	orParams := make(map[string]interface{})
+	
 	paramArr := strings.Split(paramStr, "&")
 	for _, v := range paramArr {
 		ky := strings.Split(v, "=")
 		if len(ky) != 2 {
 			continue
 		}
-		if ky[0] == "current" {
-			current, err := strconv.Atoi(ky[1])
-			if err != nil {
-				current = 1
-			}
-			if current < 1 {
-				current = 1
-			}
-			pageInfo.Current = current
-			continue
-		} else if ky[0] == "rowCount" {
-			rowCount, err := strconv.Atoi(ky[1])
-			if err != nil {
-				rowCount = 10
-			}
-			if rowCount < 1 {
-				rowCount = 10
-			} else if rowCount > 100 {
-				rowCount = 100
-			}
-			pageInfo.RowCount = rowCount
-			continue
-		} else if ky[0] == "orderStr" {
-			pageInfo.OrderStr = ky[1]
-			continue
-		} else if ky[0] == "tableName" {
-			pageInfo.TableName = ky[1]
-			continue
-		}
+		
 		key := ky[0]
 		value := ky[1]
+		
+		// 处理基础分页参数
+		if parseBasicParams(key, value, &pageInfo) {
+			continue
+		}
+		
+		// 跳过时间戳参数
 		if key == "_t" || key == "_time" || key == "_timestamp" {
 			continue
-		} else if strings.Index(value, lt) == 0 {
-			value = strings.Replace(value, lt, "", 1)
-			if value == "" {
-				continue
-			}
-			key = CamelToCase(key)
-			andParams[key+" < ?"] = value
-			continue
-		} else if strings.Index(value, lte) == 0 {
-			value = strings.Replace(value, lte, "", 1)
-			if value == "" {
-				continue
-			}
-			key = CamelToCase(key)
-			andParams[key+" <= ?"] = value
-			continue
-		} else if strings.Index(value, gt) == 0 {
-			value = strings.Replace(value, gt, "", 1)
-			if value == "" {
-				continue
-			}
-			key = CamelToCase(key)
-			andParams[key+" > ?"] = value
-			continue
-		} else if strings.Index(value, gte) == 0 {
-			value = strings.Replace(value, gte, "", 1)
-			if value == "" {
-				continue
-			}
-			key = CamelToCase(key)
-			andParams[key+" >= ?"] = value
-			continue
-		} else if strings.Index(value, lk) == 0 {
-			value = strings.Replace(value, lk, "", 1)
-			if value == "" {
-				continue
-			}
-			key = CamelToCase(key)
-			andParams[key+" LIKE ?"] = value + "%"
-			continue
-		} else if strings.Index(value, eq) == 0 {
-			value = strings.Replace(value, eq, "", 1)
-			if value == "" {
-				continue
-			}
-			key = CamelToCase(key)
-			andParams[key+" = ?"] = value
-			continue
-		} else if strings.Index(value, orlt) == 0 {
-			value = strings.Replace(value, orlt, "", 1)
-			if value == "" {
-				continue
-			}
-			key = CamelToCase(key)
-			orParams[key+" < ?"] = value
-		} else if strings.Index(value, orlte) == 0 {
-			value = strings.Replace(value, orlte, "", 1)
-			if value == "" {
-				continue
-			}
-			key = CamelToCase(key)
-			orParams[key+" <= ?"] = value
-		} else if strings.Index(value, orgte) == 0 {
-			value = strings.Replace(value, orgte, "", 1)
-			if value == "" {
-				continue
-			}
-			key = CamelToCase(key)
-			orParams[key+" >= ?"] = value
-		} else if strings.Index(value, orgt) == 0 {
-			value = strings.Replace(value, orgt, "", 1)
-			if value == "" {
-				continue
-			}
-			key = CamelToCase(key)
-			orParams[key+" > ?"] = value
-		} else if strings.Index(value, orlk) == 0 {
-			value = strings.Replace(value, oreq, "", 1)
-			if value == "" {
-				continue
-			}
-			key = CamelToCase(key)
-			orParams[key+" LIKE ?"] = value + "%"
-		} else if strings.Index(value, oreq) == 0 {
-			value = strings.Replace(value, oreq, "", 1)
-			if value == "" {
-				continue
-			}
-			key = CamelToCase(key)
-			orParams[key+" = ?"] = value
-		} else {
-			if value == "" {
-				continue
-			}
-			key = CamelToCase(key)
-			andParams[key+" = ?"] = value
 		}
+		
+		// 先尝试处理OR条件
+		if parseOrCondition(key, value, orParams) {
+			continue
+		}
+		
+		// 处理AND条件（包括默认等于条件）
+		parseAndCondition(key, value, andParams)
 	}
-	if pageInfo.OrderStr != "" {
-		v := CamelToCase(pageInfo.OrderStr)
-		v = strings.ReplaceAll(v, pd, " desc,")
-		v = strings.ReplaceAll(v, pa, " asc,")
-		v = strings.TrimSuffix(v, ",")
-		pageInfo.OrderStr = v
-	}
+	
+	// 处理排序字符串
+	pageInfo.OrderStr = processOrderString(pageInfo.OrderStr)
 	pageInfo.AndParams = andParams
 	pageInfo.OrParams = orParams
 	return &pageInfo
@@ -349,9 +370,9 @@ func CheckPageRows(currentStr, rowCountStr string) (current, rowCount int) {
 }
 
 // FindPage 分页查询 v-空对象指针
-func FindPage(v interface{}, rows interface{}, pageInfo *PageInfo) (err error, pageBean *PageBean) {
+func FindPage(v interface{}, rows interface{}, pageInfo *PageInfo) (pageBean *PageBean, err error) {
 	if pageInfo == nil {
-		return errors.New("入参pageInfo不能为空指针 "), nil
+		return nil, errors.New("入参pageInfo不能为空指针")
 	}
 	pageBean = &PageBean{Page: pageInfo.Current, PageSize: pageInfo.RowCount}
 	var total int64
@@ -363,12 +384,12 @@ func FindPage(v interface{}, rows interface{}, pageInfo *PageInfo) (err error, p
 	andCons := pageInfo.AndParams
 	orCons := pageInfo.OrParams
 	orderStr := pageInfo.OrderStr
-	if andCons != nil && len(andCons) > 0 {
+	if len(andCons) > 0 {
 		for k, v := range andCons {
 			db = db.Where(k, v)
 		}
 	}
-	if orCons != nil && len(orCons) > 0 {
+	if len(orCons) > 0 {
 		for k, v := range orCons {
 			db = db.Or(k, v)
 		}

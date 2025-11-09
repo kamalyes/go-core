@@ -18,7 +18,6 @@ import (
 
 	"github.com/kamalyes/go-config/pkg/database"
 	"github.com/kamalyes/go-core/pkg/global"
-	"go.uber.org/zap"
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/postgres"
 	"gorm.io/driver/sqlite"
@@ -46,7 +45,7 @@ func GormMySQL() *gorm.DB {
 	config := global.CONFIG.MySQL
 	dbConfig, err := database.NewDBConfig(database.DBTypeMySQL, config)
 	if err != nil {
-		global.LOG.Error("MySQL config error", zap.Error(err))
+		global.LOGGER.WithError(err).ErrorMsg("MySQL config error")
 		return nil
 	}
 	return initDB(*dbConfig, database.DBTypeMySQL, func(dsn string) (*gorm.DB, error) {
@@ -59,7 +58,7 @@ func GormPostgreSQL() *gorm.DB {
 	config := global.CONFIG.PostgreSQL
 	dbConfig, err := database.NewDBConfig(database.DBTypePostgres, config)
 	if err != nil {
-		global.LOG.Error("PostgreSQL config error", zap.Error(err))
+		global.LOGGER.WithError(err).ErrorMsg("PostgreSQL config error")
 		return nil
 	}
 	return initDB(*dbConfig, database.DBTypePostgres, func(dsn string) (*gorm.DB, error) {
@@ -72,7 +71,7 @@ func GormSQLite() *gorm.DB {
 	config := global.CONFIG.SQLite
 	dbConfig, err := database.NewDBConfig(database.DBTypeSQLite, config)
 	if err != nil {
-		global.LOG.Error("SQLite config error", zap.Error(err))
+		global.LOGGER.WithError(err).ErrorMsg("SQLite config error")
 		return nil
 	}
 	return initDB(*dbConfig, database.DBTypeSQLite, func(dsn string) (*gorm.DB, error) {
@@ -83,14 +82,14 @@ func GormSQLite() *gorm.DB {
 // initDB 初始化数据库连接
 func initDB(config database.DBConfig, dbType string, openFunc func(string) (*gorm.DB, error)) *gorm.DB {
 	if config.Host == "" {
-		global.LOG.Error("Database host is empty")
+		global.LOGGER.Error("Database host is empty")
 		return nil
 	}
 
 	dsn := buildDSN(config, dbType)
 	db, err := openFunc(dsn)
 	if err != nil {
-		global.LOG.Error(fmt.Sprintf("%s database startup error", dbType), zap.Any("err", err))
+		global.LOGGER.ErrorKV(fmt.Sprintf("%s database startup error", dbType), "err", err)
 		os.Exit(0)
 		return nil
 	}

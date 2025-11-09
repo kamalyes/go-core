@@ -76,7 +76,7 @@ func (rs *RedisStore) UseWithCtx(ctx context.Context) *RedisStore {
 
 // logRedisStoreError 记录 Redis 操作错误并返回错误
 func logRedisStoreError(action string, err error) error {
-	global.LOG.Error(action, zap.Error(err))
+	global.LOGGER.Error(action, zap.Error(err))
 	return err
 }
 

@@ -2,7 +2,7 @@
  * @Author: kamalyes 501893067@qq.com
  * @Date: 2025-11-07 12:00:00
  * @LastEditors: kamalyes 501893067@qq.com
- * @LastEditTime: 2025-11-07 11:03:24
+ * @LastEditTime: 2025-11-10 01:48:43
  * @FilePath: \go-core\pkg\database\client_test.go
  * @Description: client 数据库连接测试
  *
@@ -15,8 +15,8 @@ import (
 
 	"github.com/kamalyes/go-config/pkg/database"
 	"github.com/kamalyes/go-core/pkg/global"
+	gologger "github.com/kamalyes/go-logger"
 	"github.com/stretchr/testify/assert"
-	"go.uber.org/zap"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 )
@@ -96,11 +96,11 @@ func TestGormFunctionsWithoutConfig(t *testing.T) {
 // TestInitDBWithEmptyHost 测试空主机配置
 func TestInitDBWithEmptyHost(t *testing.T) {
 	// 备份原始配置
-	originalLog := global.LOG
-	global.LOG, _ = zap.NewDevelopment()
+	originalLog := global.LOGGER
+	global.LOGGER = gologger.NewLogger(&gologger.LogConfig{Level: gologger.INFO})
 
 	defer func() {
-		global.LOG = originalLog
+		global.LOGGER = originalLog
 	}()
 
 	config := database.DBConfig{

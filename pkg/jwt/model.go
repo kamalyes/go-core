@@ -26,7 +26,7 @@ func AutoCreateTables() {
 		)
 		if err != nil {
 			errMsgs := fmt.Sprintf("自动创建%s表失败", string(CustomClaims{}.TableName()))
-			global.LOG.Error(errMsgs, zap.Any("err", err))
+			global.LOGGER.Error(errMsgs, zap.Any("err", err))
 		}
 	}
 }

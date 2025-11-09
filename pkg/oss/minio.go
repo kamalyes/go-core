@@ -21,7 +21,6 @@ import (
 	"github.com/kamalyes/go-core/pkg/global"
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
-	"go.uber.org/zap"
 )
 
 var (
@@ -40,12 +39,12 @@ func Minio() *minio.Client {
 		Creds: credentials.NewStaticV4(minioCfg.AccessKey, minioCfg.SecretKey, ""),
 	})
 	if err != nil {
-		global.LOG.Error("minio new client failed, err:", zap.Any("err", err))
+		global.LOGGER.ErrorKV("minio new client failed", "err", err)
 	}
 	// 检查服务状态
 	_, err = client.HealthCheck(3)
 	if err != nil {
-		global.LOG.Error("minio connect ping failed, err:", zap.Any("err", err))
+		global.LOGGER.ErrorKV("minio connect ping failed", "err", err)
 		return nil
 	} else {
 		return client
@@ -61,14 +60,9 @@ func Minio() *minio.Client {
  *  @param timeOut 超时时间
  */
 func watch(ctx context.Context, status *bool, describe string, timeOut int) {
-	for {
-		select {
-		case <-ctx.Done():
-			if !*status {
-				panic(fmt.Sprintf("%s: 连接超时(%ds)", describe, timeOut))
-			}
-			return
-		}
+	<-ctx.Done()
+	if !*status {
+		panic(fmt.Sprintf("%s: 连接超时(%ds)", describe, timeOut))
 	}
 }
 

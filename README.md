@@ -81,7 +81,7 @@ func main() {
     global.CONFIG = goconfig.GlobalConfig()
 
     // 2. 初始化日志系统
-    global.LOG = zap.Zap()
+    global.LOGGER = zap.Zap()
 
     // 3. 初始化数据库连接
     global.DB = database.Gorm()
@@ -131,7 +131,7 @@ func DatabaseExample() {
     
     var users []User
     if err := builder.Find(global.DB, &users); err != nil {
-        global.LOG.Error("查询失败", zap.Error(err))
+        global.LOGGER.Error("查询失败", zap.Error(err))
         return
     }
     
@@ -142,7 +142,7 @@ func DatabaseExample() {
         user := &User{Username: "john", Email: "john@example.com"}
         return tx.Create(user)
     }); err != nil {
-        global.LOG.Error("事务执行失败", zap.Error(err))
+        global.LOGGER.Error("事务执行失败", zap.Error(err))
     }
 }
 ```
@@ -170,18 +170,18 @@ func AuthExample() {
     
     token, err := j.CreateToken(claims)
     if err != nil {
-        global.LOG.Error("Token生成失败", zap.Error(err))
+        global.LOGGER.Error("Token生成失败", zap.Error(err))
         return
     }
     
     // 验证Token
     parsedClaims, err := j.ParseToken(token)
     if err != nil {
-        global.LOG.Error("Token验证失败", zap.Error(err))
+        global.LOGGER.Error("Token验证失败", zap.Error(err))
         return
     }
     
-    global.LOG.Info("用户认证成功", zap.String("username", parsedClaims.Username))
+    global.LOGGER.Info("用户认证成功", zap.String("username", parsedClaims.Username))
 }
 ```
 

@@ -2,7 +2,7 @@
  * @Author: kamalyes 501893067@qq.com
  * @Date: 2025-11-07 12:00:00
  * @LastEditors: kamalyes 501893067@qq.com
- * @LastEditTime: 2025-11-07 11:05:56
+ * @LastEditTime: 2025-11-10 01:43:44
  * @FilePath: \go-core\pkg\database\page_test.go
  * @Description: page 分页相关测试
  *
@@ -17,8 +17,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/kamalyes/go-core/pkg/global"
+	logger "github.com/kamalyes/go-logger"
 	"github.com/stretchr/testify/assert"
-	"go.uber.org/zap"
 )
 
 // TestParseBasicParams 测试基础参数解析
@@ -303,13 +303,13 @@ func TestFindPage(t *testing.T) {
 
 	// 备份并设置全局变量
 	originalDB := global.DB
-	originalLog := global.LOG
+	originalLog := global.LOGGER
 	global.DB = db
-	global.LOG, _ = zap.NewDevelopment()
+	global.LOGGER = logger.NewLogger(&logger.LogConfig{Level: logger.INFO})
 
 	defer func() {
 		global.DB = originalDB
-		global.LOG = originalLog
+		global.LOGGER = originalLog
 	}()
 
 	// 插入测试数据

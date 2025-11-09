@@ -213,7 +213,7 @@ func (j *JWT) RefreshToken(tokenString string) (string, error) {
 // GetClaims 获取Claims
 func GetClaims(c *gin.Context) (*CustomClaims, error) {
 	if claims, exists := c.Get("claims"); !exists {
-		global.LOG.Error("从Gin的Context中获取从jwt解析出来的用户claims失败, 请检查路由是否使用jwt中间件")
+		global.LOGGER.Error("从Gin的Context中获取从jwt解析出来的用户claims失败, 请检查路由是否使用jwt中间件")
 		return nil, errors.New("获取用户用户claims失败")
 	} else {
 		token := claims.(*CustomClaims)

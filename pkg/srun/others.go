@@ -19,7 +19,6 @@ import (
 	"github.com/fvbock/endless"
 	"github.com/gin-gonic/gin"
 	"github.com/kamalyes/go-core/pkg/global"
-	"go.uber.org/zap"
 )
 
 // RunHttpServer Linux，unix等环境下启动服务
@@ -28,10 +27,10 @@ func RunHttpServer(r *gin.Engine) {
 	s := initServer(address, r)
 	// 保证文本顺序输出
 	time.Sleep(20 * time.Microsecond)
-	global.LOG.Info("server run success on ", zap.String("address", address))
+	global.LOGGER.InfoKV("server run success on", "address", address)
 	err := s.ListenAndServe()
 	if err != nil {
-		global.LOG.Error(err.Error())
+		global.LOGGER.Error(err.Error())
 	}
 }
 

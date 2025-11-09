@@ -15,14 +15,13 @@ import (
 
 	pahoMqtt "github.com/eclipse/paho.mqtt.golang"
 	"github.com/kamalyes/go-core/pkg/global"
-	"go.uber.org/zap"
 )
 
 // DefaultMqtt 创建默认的mqtt客户端
 func DefaultMqtt(clientId string) *pahoMqtt.Client {
-	global.LOG.Info("MQTT开始连接......")
+	global.LOGGER.Info("MQTT开始连接......")
 	config := global.CONFIG.Mqtt
-	global.LOG.Info("MQTT连接地址：" + config.Endpoint)
+	global.LOGGER.Info("MQTT连接地址：" + config.Endpoint)
 	opts := pahoMqtt.NewClientOptions().AddBroker(config.Endpoint).SetClientID(clientId)
 	// 设置mqtt协议版本 4是3.1.1，3是3.1
 	opts.SetProtocolVersion(config.ProtocolVersion)
@@ -47,16 +46,16 @@ func DefaultMqtt(clientId string) *pahoMqtt.Client {
 	opts.SetWill(config.WillTopic, clientId, 1, false)
 	client := pahoMqtt.NewClient(opts)
 	if token := client.Connect(); token.Wait() && token.Error() != nil {
-		global.LOG.Error("MQTT连接异常......", zap.Any(" mqtt:", token.Error()))
+		global.LOGGER.ErrorKV("MQTT连接异常", "mqtt_error", token.Error())
 	}
 	return &client
 }
 
 // Mqtt 连接和订阅
 func Mqtt(clientId string, onConn pahoMqtt.OnConnectHandler, onLost pahoMqtt.ConnectionLostHandler, reConn pahoMqtt.ReconnectHandler) *pahoMqtt.Client {
-	global.LOG.Info("MQTT开始连接......")
+	global.LOGGER.Info("MQTT开始连接......")
 	config := global.CONFIG.Mqtt
-	global.LOG.Info("MQTT连接地址：" + config.Endpoint)
+	global.LOGGER.Info("MQTT连接地址：" + config.Endpoint)
 	opts := pahoMqtt.NewClientOptions().AddBroker(config.Endpoint).SetClientID(clientId)
 	// 设置mqtt协议版本 4是3.1.1，3是3.1
 	opts.SetProtocolVersion(config.ProtocolVersion)
@@ -95,17 +94,17 @@ func Mqtt(clientId string, onConn pahoMqtt.OnConnectHandler, onLost pahoMqtt.Con
 	}
 	client := pahoMqtt.NewClient(opts)
 	if token := client.Connect(); token.Wait() && token.Error() != nil {
-		global.LOG.Error("MQTT连接异常......", zap.Any(" mqtt:", token.Error()))
+		global.LOGGER.ErrorKV("MQTT连接异常", "mqtt_error", token.Error())
 	}
 	return &client
 }
 
 // 连接断开
 func onLostHandler(client pahoMqtt.Client, err error) {
-	global.LOG.Info("MQTT连接已经断开")
+	global.LOGGER.Info("MQTT连接已经断开")
 }
 
 // 断线重连后重新回调
 func reConnHandler(client pahoMqtt.Client, options *pahoMqtt.ClientOptions) {
-	global.LOG.Info("MQTT开始重新连接")
+	global.LOGGER.Info("MQTT开始重新连接")
 }

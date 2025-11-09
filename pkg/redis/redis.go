@@ -15,7 +15,6 @@ import (
 
 	"github.com/go-redis/redis/v8"
 	"github.com/kamalyes/go-core/pkg/global"
-	"go.uber.org/zap"
 )
 
 // Redis 初始z化redis客户端
@@ -38,10 +37,10 @@ func Redis() *redis.Client {
 	})
 	pong, err := client.Ping(context.TODO()).Result()
 	if err != nil {
-		global.LOG.Error("redis connect ping failed, err:", zap.Any("err", err))
+		global.LOGGER.ErrorKV("redis connect ping failed", "err", err)
 		return nil
 	} else {
-		global.LOG.Info("redis connect ping response:", zap.String("pong", pong))
+		global.LOGGER.InfoKV("redis connect ping response", "pong", pong)
 		return client
 	}
 }

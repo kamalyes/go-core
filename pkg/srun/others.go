@@ -5,7 +5,7 @@
  * @Author: kamalyes 501893067@qq.com
  * @Date: 2023-07-28 00:50:58
  * @LastEditors: kamalyes 501893067@qq.com
- * @LastEditTime: 2024-11-03 20:19:06
+ * @LastEditTime: 2025-11-09 19:41:52
  * @FilePath: \go-core\pkg\srun\others.go
  * @Description:
  *
@@ -14,7 +14,6 @@
 package srun
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/fvbock/endless"
@@ -25,7 +24,7 @@ import (
 
 // RunHttpServer Linux，unix等环境下启动服务
 func RunHttpServer(r *gin.Engine) {
-	address := fmt.Sprintf(":%s", global.CONFIG.Server.Addr)
+	address := global.CONFIG.Server.Endpoint
 	s := initServer(address, r)
 	// 保证文本顺序输出
 	time.Sleep(20 * time.Microsecond)

@@ -32,12 +32,11 @@ var (
 // Minio 初始z化minio客户端
 func Minio() *minio.Client {
 	minioCfg := global.CONFIG.Minio
-	if minioCfg.Host == "" {
+	if minioCfg.Endpoint == "" {
 		return nil
 	}
-	endpoint := fmt.Sprintf("%s:%d", minioCfg.Host, minioCfg.Port)
 	// 创建MinIO客户端
-	client, err := minio.New(endpoint, &minio.Options{
+	client, err := minio.New(minioCfg.Endpoint, &minio.Options{
 		Creds: credentials.NewStaticV4(minioCfg.AccessKey, minioCfg.SecretKey, ""),
 	})
 	if err != nil {

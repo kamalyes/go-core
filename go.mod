@@ -1,10 +1,13 @@
 module github.com/kamalyes/go-core
 
-go 1.21
+go 1.23.0
 
 require (
+	github.com/alibabacloud-go/dysmsapi-20170525/v3 v3.0.6
+	github.com/aliyun/aliyun-oss-go-sdk v3.0.2+incompatible
 	github.com/asim/go-micro/plugins/registry/consul/v3 v3.7.0
 	github.com/asim/go-micro/v3 v3.7.0
+	github.com/aws/aws-sdk-go-v2/service/s3 v1.90.0
 	github.com/bwmarrin/snowflake v0.3.0
 	github.com/casbin/casbin/v2 v2.98.0
 	github.com/casbin/gorm-adapter/v3 v3.26.0
@@ -16,10 +19,13 @@ require (
 	github.com/go-redis/redis/v8 v8.11.0
 	github.com/gofiber/fiber/v2 v2.52.5
 	github.com/golang-jwt/jwt/v4 v4.5.0
-	github.com/kamalyes/go-config v0.5.3
+	github.com/kamalyes/go-cachex v0.1.1
+	github.com/kamalyes/go-config v0.6.0
+	github.com/kamalyes/go-logger v0.0.0-20251109052836-c53bbb5942bf
 	github.com/labstack/echo/v4 v4.12.0
 	github.com/minio/minio-go/v7 v7.0.74
 	github.com/spf13/viper v1.19.0
+	go.etcd.io/bbolt v1.3.2
 	go.uber.org/zap v1.27.0
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
 	gorm.io/driver/mysql v1.5.7
@@ -29,15 +35,40 @@ require (
 )
 
 require (
+	github.com/alibabacloud-go/alibabacloud-gateway-spi v0.0.4 // indirect
+	github.com/alibabacloud-go/darabonba-openapi/v2 v2.0.2 // indirect
+	github.com/alibabacloud-go/debug v0.0.0-20190504072949-9472017b5c68 // indirect
+	github.com/alibabacloud-go/endpoint-util v1.1.0 // indirect
+	github.com/alibabacloud-go/openapi-util v0.1.0 // indirect
+	github.com/alibabacloud-go/tea v1.1.19 // indirect
+	github.com/alibabacloud-go/tea-utils v1.3.1 // indirect
+	github.com/alibabacloud-go/tea-utils/v2 v2.0.3 // indirect
+	github.com/alibabacloud-go/tea-xml v1.1.2 // indirect
+	github.com/aliyun/credentials-go v1.1.2 // indirect
 	github.com/andybalholm/brotli v1.0.5 // indirect
+	github.com/aws/aws-sdk-go-v2 v1.39.6 // indirect
+	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.7.3 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/configsources v1.4.13 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.7.13 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/v4a v1.4.13 // indirect
+	github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.13.3 // indirect
+	github.com/aws/aws-sdk-go-v2/service/internal/checksum v1.9.4 // indirect
+	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.13.13 // indirect
+	github.com/aws/aws-sdk-go-v2/service/internal/s3shared v1.19.13 // indirect
+	github.com/aws/smithy-go v1.23.2 // indirect
+	github.com/clbanning/mxj/v2 v2.5.5 // indirect
+	github.com/dgraph-io/ristretto/v2 v2.3.0 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/labstack/gommon v0.4.2 // indirect
 	github.com/mattn/go-runewidth v0.0.15 // indirect
+	github.com/redis/go-redis/v9 v9.16.0 // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
+	github.com/tjfoc/gmsm v1.3.2 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasthttp v1.51.0 // indirect
 	github.com/valyala/fasttemplate v1.2.2 // indirect
 	github.com/valyala/tcplisten v1.0.0 // indirect
+	golang.org/x/time v0.5.0 // indirect
 )
 
 require (
@@ -49,7 +80,7 @@ require (
 	github.com/bytedance/sonic v1.11.6 // indirect
 	github.com/bytedance/sonic/loader v0.1.1 // indirect
 	github.com/casbin/govaluate v1.2.0 // indirect
-	github.com/cespare/xxhash/v2 v2.1.2 // indirect
+	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/cloudwego/base64x v0.1.4 // indirect
 	github.com/cloudwego/iasm v0.2.0 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.0 // indirect
@@ -127,7 +158,7 @@ require (
 	github.com/spf13/afero v1.11.0 // indirect
 	github.com/spf13/cast v1.6.0
 	github.com/spf13/pflag v1.0.5 // indirect
-	github.com/stretchr/testify v1.10.0
+	github.com/stretchr/testify v1.11.1
 	github.com/subosito/gotenv v1.6.0 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/ugorji/go/codec v1.2.12 // indirect
@@ -139,7 +170,7 @@ require (
 	golang.org/x/exp v0.0.0-20230905200255-921286631fa9 // indirect
 	golang.org/x/net v0.27.0 // indirect
 	golang.org/x/sync v0.8.0 // indirect
-	golang.org/x/sys v0.26.0 // indirect
+	golang.org/x/sys v0.35.0 // indirect
 	golang.org/x/text v0.19.0 // indirect
 	google.golang.org/protobuf v1.34.1 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect

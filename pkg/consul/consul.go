@@ -29,7 +29,7 @@ func NewRegistry() registry.Registry {
 	if cr != nil {
 		return cr
 	}
-	cr = consul.NewRegistry(registry.Addrs(global.CONFIG.Consul.Addr))
+	cr = consul.NewRegistry(registry.Addrs(global.CONFIG.Consul.Endpoint))
 	return cr
 }
 

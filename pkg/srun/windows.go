@@ -5,7 +5,7 @@
  * @Author: kamalyes 501893067@qq.com
  * @Date: 2023-07-28 00:50:58
  * @LastEditors: kamalyes 501893067@qq.com
- * @LastEditTime: 2024-08-09 10:05:35
+ * @LastEditTime: 2025-11-09 18:32:24
  * @FilePath: \go-core\pkg\srun\windows.go
  * @Description:
  *
@@ -14,7 +14,6 @@
 package srun
 
 import (
-	"fmt"
 	"net/http"
 	"time"
 
@@ -25,7 +24,7 @@ import (
 
 // RunHttpServer Windows环境下启动服务
 func RunHttpServer(r *gin.Engine) {
-	address := fmt.Sprintf(":%s", global.CONFIG.Server.Addr)
+	address := global.CONFIG.Server.Endpoint
 	s := initServer(address, r)
 	// 保证文本能够顺序输出
 	time.Sleep(20 * time.Microsecond)

@@ -2,7 +2,7 @@
  * @Author: kamalyes 501893067@qq.com
  * @Date: 2023-07-28 00:50:58
  * @LastEditors: kamalyes 501893067@qq.com
- * @LastEditTime: 2024-11-03 22:35:39
+ * @LastEditTime: 2025-11-09 19:32:09
  * @FilePath: \go-core\pkg\global\global.go
  * @Description:
  *
@@ -11,6 +11,8 @@
 package global
 
 import (
+	"net/smtp"
+
 	"github.com/bwmarrin/snowflake"
 	"github.com/casbin/casbin/v2"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
@@ -18,8 +20,15 @@ import (
 	"github.com/go-redis/redis/v8"
 	goconfig "github.com/kamalyes/go-config"
 	"github.com/kamalyes/go-config/pkg/env"
+
+	dysmsapi20170525 "github.com/alibabacloud-go/dysmsapi-20170525/v3/client"
+	aliyunoss "github.com/aliyun/aliyun-oss-go-sdk/oss"
+	awss3oss "github.com/aws/aws-sdk-go-v2/service/s3"
+	cachex "github.com/kamalyes/go-cachex"
+	logger "github.com/kamalyes/go-logger"
 	"github.com/minio/minio-go/v7"
 	"github.com/spf13/viper"
+	bbolt "go.etcd.io/bbolt"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
@@ -36,8 +45,26 @@ var (
 	// REDIS 默认客户端
 	REDIS *redis.Client
 
+	// Cachex 默认客户端
+	CACHEX cachex.CtxCache
+
+	// ALIYUNOSS 阿里云OSS客户端
+	ALIYUNOSS *aliyunoss.Client
+
+	// AWSS3OSS AWS S3客户端
+	AWSS3OSS *awss3oss.Client
+
+	// DYSMS 阿里云短信客户端
+	DYSMS  *dysmsapi20170525.Client
+
+	// BOLTDB BoltDB客户端
+	BOLTDB *bbolt.DB
+
 	// MQTT 客户端
 	MQTT *mqtt.Client
+
+	// SMTP 客户端
+	SMTP *smtp.Client
 
 	// CONFIG 全局系统配置
 	CONFIG *goconfig.SingleConfig
@@ -47,6 +74,9 @@ var (
 
 	// LOG 全局日志
 	LOG *zap.Logger
+
+	// LOGGER 高性能日志
+	LOGGER *logger.Logger
 
 	// CSBEF casbin实施者
 	CSBEF casbin.IEnforcer

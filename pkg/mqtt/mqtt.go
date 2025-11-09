@@ -22,8 +22,8 @@ import (
 func DefaultMqtt(clientId string) *pahoMqtt.Client {
 	global.LOG.Info("MQTT开始连接......")
 	config := global.CONFIG.Mqtt
-	global.LOG.Info("MQTT连接地址：" + config.Url)
-	opts := pahoMqtt.NewClientOptions().AddBroker(config.Url).SetClientID(clientId)
+	global.LOG.Info("MQTT连接地址：" + config.Endpoint)
+	opts := pahoMqtt.NewClientOptions().AddBroker(config.Endpoint).SetClientID(clientId)
 	// 设置mqtt协议版本 4是3.1.1，3是3.1
 	opts.SetProtocolVersion(config.ProtocolVersion)
 	// 客户端掉线服务端不清除session
@@ -56,8 +56,8 @@ func DefaultMqtt(clientId string) *pahoMqtt.Client {
 func Mqtt(clientId string, onConn pahoMqtt.OnConnectHandler, onLost pahoMqtt.ConnectionLostHandler, reConn pahoMqtt.ReconnectHandler) *pahoMqtt.Client {
 	global.LOG.Info("MQTT开始连接......")
 	config := global.CONFIG.Mqtt
-	global.LOG.Info("MQTT连接地址：" + config.Url)
-	opts := pahoMqtt.NewClientOptions().AddBroker(config.Url).SetClientID(clientId)
+	global.LOG.Info("MQTT连接地址：" + config.Endpoint)
+	opts := pahoMqtt.NewClientOptions().AddBroker(config.Endpoint).SetClientID(clientId)
 	// 设置mqtt协议版本 4是3.1.1，3是3.1
 	opts.SetProtocolVersion(config.ProtocolVersion)
 	// 客户端掉线服务端不清除session

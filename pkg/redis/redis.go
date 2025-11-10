@@ -2,7 +2,7 @@
  * @Author: kamalyes 501893067@qq.com
  * @Date: 2023-07-28 00:50:58
  * @LastEditors: kamalyes 501893067@qq.com
- * @LastEditTime: 2024-08-10 23:55:20
+ * @LastEditTime: 2025-11-10 10:55:49
  * @FilePath: \go-core\pkg\redis\redis.go
  * @Description:
  *
@@ -13,8 +13,8 @@ package redis
 import (
 	"context"
 
-	"github.com/go-redis/redis/v8"
 	"github.com/kamalyes/go-core/pkg/global"
+	"github.com/redis/go-redis/v9"
 )
 
 // Redis 初始z化redis客户端

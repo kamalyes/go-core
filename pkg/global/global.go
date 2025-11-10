@@ -2,7 +2,7 @@
  * @Author: kamalyes 501893067@qq.com
  * @Date: 2023-07-28 00:50:58
  * @LastEditors: kamalyes 501893067@qq.com
- * @LastEditTime: 2025-11-09 19:32:09
+ * @LastEditTime: 2025-11-10 10:55:35
  * @FilePath: \go-core\pkg\global\global.go
  * @Description:
  *
@@ -17,9 +17,9 @@ import (
 	"github.com/casbin/casbin/v2"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	ut "github.com/go-playground/universal-translator"
-	"github.com/go-redis/redis/v8"
 	goconfig "github.com/kamalyes/go-config"
 	"github.com/kamalyes/go-config/pkg/env"
+	"github.com/redis/go-redis/v9"
 
 	dysmsapi20170525 "github.com/alibabacloud-go/dysmsapi-20170525/v3/client"
 	aliyunoss "github.com/aliyun/aliyun-oss-go-sdk/oss"
@@ -55,7 +55,7 @@ var (
 	AWSS3OSS *awss3oss.Client
 
 	// DYSMS 阿里云短信客户端
-	DYSMS  *dysmsapi20170525.Client
+	DYSMS *dysmsapi20170525.Client
 
 	// BOLTDB BoltDB客户端
 	BOLTDB *bbolt.DB
